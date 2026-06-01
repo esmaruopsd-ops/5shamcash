@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- PWA Core -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="شام كاش">
+<meta name="application-name" content="شام كاش">
+<meta name="theme-color" content="#1a2332">
+<meta name="msapplication-navbutton-color" content="#1a2332">
+<meta name="msapplication-starturl" content="./index.html">
+<meta name="format-detection" content="telephone=no">
+
+<!-- SEO / Description -->
+<meta name="description" content="تطبيق إدارة الأرشيف العسكري ورفع صور الأفراد - شام كاش">
+
+<!-- Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple Icons -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96.png">
+<link rel="shortcut icon" href="icons/icon-96.png">
+
+<!-- Splash / Launch Images (iOS) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<title>شام كاش — الأرشيف العسكري</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+  /* Military deep teal-navy palette */
+  --bg:        #0f1923;
+  --surface:   #162030;
+  --surface2:  #1e2d3d;
+  --surface3:  #243447;
+  --border:    #2a3f55;
+  --border2:   #344e66;
+
+  --accent:    #00c6a7;   /* military teal */
+  --accent2:   #009e85;
+  --accent-bg: rgba(0,198,167,.10);
+
+  --gold:      #d4a843;
+  --gold2:     #b08020;
+  --gold-bg:   rgba(212,168,67,.10);
+
+  --text:      #e8f0fe;
+  --text2:     #a8bdd0;
+  --muted:     #5a7a96;
+
+  --green:     #4cdb8a;
+  --red:       #ff5f6d;
+  --orange:    #ffaa44;
+
+  --u0: #d4a843;
+  --u1: #00c6a7;
+  --u2: #4a9eff;
+  --u3: #c77dff;
+  --u4: #ff7b54;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 24px rgba(0,0,0,.45);
+
+  --nav-h: 68px;
+  --header-h: 64px;
+  --statusbar: env(safe-area-inset-top, 0px);
+}
+
+* { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===================== APP SHELL ===================== */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: 100dvh;
+}
+
+/* ===================== STATUS BAR ===================== */
+.statusbar {
+  height: var(--statusbar);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+/* ===================== TOP BAR ===================== */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 50;
+}
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  box-shadow: 0 2px 12px rgba(212,168,67,.3);
+}
+.topbar-title { font-size: 16px; font-weight: 700; }
+.topbar-sub { font-size: 10px; color: var(--muted); }
+.topbar-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface2);
+  color: var(--text2);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: var(--surface3); }
+
+/* ===================== PROGRESS STRIP ===================== */
+.progress-strip {
+  background: var(--surface);
+  padding: 8px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-label { font-size: 11px; color: var(--muted); }
+.progress-count { font-size: 12px; font-weight: 700; color: var(--accent); }
+.progress-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+
+/* ===================== SCROLL BODY ===================== */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: calc(var(--nav-h) + 16px);
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+/* ===================== UNIT CHIPS ===================== */
+.chip-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.chip-scroll::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 7px 16px;
+  border-radius: 50px;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.chip:active { transform: scale(0.96); }
+.chip.active {
+  color: #0f1923;
+  font-weight: 700;
+  border-color: transparent;
+}
+
+/* ===================== UNIT SUMMARY CARDS ===================== */
+.unit-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 0 16px 4px;
+}
+.uc {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.uc::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 3px; height: 100%;
+  background: var(--uc-col);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.uc.active { background: var(--surface3); border-color: var(--uc-col); }
+.uc-name { font-size: 12px; font-weight: 600; color: var(--uc-col); margin-bottom: 6px; }
+.uc-stats { display: flex; align-items: center; justify-content: space-between; }
+.uc-count { font-size: 11px; color: var(--muted); }
+.uc-ring {
+  width: 32px; height: 32px;
+  position: relative;
+}
+.uc-ring svg { transform: rotate(-90deg); }
+.uc-ring circle { transition: stroke-dashoffset 0.5s; }
+
+/* ===================== SECTION HEADER ===================== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 10px;
+}
+.section-title { font-size: 15px; font-weight: 700; }
+.section-count {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 3px 10px;
+  border-radius: 50px;
+}
+
+/* ===================== PERSON CARDS ===================== */
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.pcard {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.pcard.uploaded {
+  border-color: var(--pc);
+  box-shadow: 0 0 0 1px var(--pc), 0 4px 20px rgba(0,0,0,.3);
+}
+.pcard-inner { display: flex; align-items: stretch; }
+
+/* Image thumb */
+.pcard-thumb {
+  width: 80px;
+  flex-shrink: 0;
+  background: var(--surface3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.pcard-thumb:active { opacity: 0.85; }
+.pcard-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pcard-thumb-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+.pcard-thumb-placeholder .t-icon { font-size: 22px; }
+.pcard-thumb-placeholder .t-hint { font-size: 9px; text-align: center; line-height: 1.3; }
+.pcard-thumb-badge {
+  position: absolute;
+  bottom: 4px; left: 4px;
+  background: var(--accent);
+  color: #0f1923;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* Info */
+.pcard-info {
+  flex: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.pcard-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.pcard-meta { display: flex; align-items: center; gap: 6px; }
+.pcard-mid {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--pc);
+  background: var(--pc-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.pcard-unit { font-size: 11px; color: var(--muted); }
+.pcard-num { font-size: 10px; color: var(--border2); margin-top: 3px; }
+
+/* Actions */
+.pcard-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.pact {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface3);
+  color: var(--text2);
+}
+.pact:active { transform: scale(0.92); }
+.pact.primary {
+  background: var(--pc);
+  color: #0f1923;
+  font-size: 15px;
+}
+.pact.primary:disabled { background: var(--border); color: var(--muted); cursor: default; }
+.pact.del { background: rgba(255,95,109,.12); color: var(--red); }
+
+/* ===================== BOTTOM NAV ===================== */
+.bottomnav {
+  height: var(--nav-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 50;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  border: none;
+  background: transparent;
+  font-family: 'Tajawal', sans-serif;
+  color: var(--muted);
+}
+.nav-item.active { color: var(--accent); }
+.nav-item:active { background: var(--surface2); }
+.nav-icon { font-size: 22px; line-height: 1; position: relative; }
+.nav-badge {
+  position: absolute;
+  top: -4px; left: -6px;
+  background: var(--accent);
+  color: #0f1923;
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
+.nav-label { font-size: 10px; font-weight: 500; }
+.nav-pill {
+  position: absolute;
+  top: 0;
+  width: 36px; height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 3px 3px;
+  transition: all 0.3s;
+  opacity: 0;
+}
+.nav-item.active .nav-pill { opacity: 1; }
+
+/* ===================== FAB ===================== */
+.fab {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #0f1923;
+  font-size: 24px;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0,198,167,.4);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  z-index: 40;
+}
+.fab:active { transform: scale(0.93); box-shadow: 0 2px 10px rgba(0,198,167,.3); }
+
+/* ===================== BOTTOM SHEET ===================== */
+.sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(4px);
+}
+.sheet-overlay.show { opacity: 1; pointer-events: all; }
+.sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface2);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border2);
+  z-index: 201;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(.32,0,.67,0);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.sheet.show { transform: translateY(0); transition-timing-function: cubic-bezier(.33,1,.68,1); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 12px auto 16px;
+}
+.sheet-title {
+  font-size: 16px; font-weight: 700;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: none; background: transparent;
+  width: 100%; text-align: right;
+  font-family: 'Tajawal', sans-serif; color: var(--text);
+  font-size: 15px;
+}
+.sheet-item:active { background: var(--surface3); }
+.sheet-item-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.sheet-item-text { flex: 1; }
+.sheet-item-label { font-size: 14px; font-weight: 600; }
+.sheet-item-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.sheet-item-count {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 12px; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+}
+
+/* ===================== TOAST ===================== */
+.toast-wrap {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 10px + env(safe-area-inset-bottom, 0px));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  z-index: 300;
+  transition: all 0.3s cubic-bezier(.33,1,.68,1);
+  opacity: 0;
+  pointer-events: none;
+}
+.toast-wrap.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-inner {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 8px;
+}
+.toast-inner.ok { border-color: var(--accent); color: var(--accent); }
+.toast-inner.err { border-color: var(--red); color: var(--red); }
+
+/* ===================== EMPTY ===================== */
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 20px;
+  gap: 10px;
+  color: var(--muted);
+}
+.empty-state .e-icon { font-size: 48px; }
+.empty-state .e-text { font-size: 15px; }
+
+/* ===================== RIPPLE ===================== */
+.ripple { position: relative; overflow: hidden; }
+.ripple-effect {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  transform: scale(0);
+  animation: ripple-anim 0.5s linear;
+  pointer-events: none;
+}
+@keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+/* ===================== ANIMATIONS ===================== */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pcard { animation: fadeSlideIn 0.25s ease both; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 0.8s linear infinite; }
+
+/* drag */
+.pcard-thumb.drag { border: 2px dashed var(--accent); background: var(--accent-bg); }
+
+/* Upload input hidden */
+.hidden-input { display: none; }
+</style>
+</head>
+<body>
+
+<!-- HIDDEN FILE INPUTS -->
+<div id="inputs"></div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap">
+  <div class="toast-inner" id="toastInner"></div>
+</div>
+
+<!-- BOTTOM SHEET OVERLAY -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="sheetTitle">تصدير الصور</div>
+  <div id="sheetBody"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="statusbar"></div>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-icon">🪖</div>
+      <div>
+        <div class="topbar-title">شام كاش</div>
+        <div class="topbar-sub">الأرشيف العسكري</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="openExportSheet('الكل')" title="تصدير">📤</button>
+      <button class="icon-btn" onclick="openSearchSheet()" title="بحث">🔍</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-strip">
+    <div class="progress-row">
+      <span class="progress-label">تقدم رفع الصور</span>
+      <span class="progress-count" id="progressCount">0 / 115</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- SCROLL BODY -->
+  <div class="scroll-body" id="scrollBody">
+
+    <!-- CHIPS -->
+    <div class="chip-scroll" id="chipScroll"></div>
+
+    <!-- UNIT SUMMARY -->
+    <div class="unit-summary" id="unitSummary"></div>
+
+    <!-- SECTION HEADER -->
+    <div class="section-header">
+      <span class="section-title" id="sectionTitle">جميع الأفراد</span>
+      <span class="section-count" id="sectionCount">115 فرد</span>
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards-list" id="cardsList"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <button class="nav-item active" id="navHome" onclick="setNav('home')">
+      <div class="nav-pill"></div>
+      <div class="nav-icon" style="position:relative">🏠<span class="nav-badge" id="uploadBadge" style="display:none">0</span></div>
+      <span class="nav-label">الرئيسية</span>
+    </button>
+    <button class="nav-item" id="navUnits" onclick="setNav('units')">
+      <div class="nav-pill"></div>
+      <div class="nav-icon">🪖</div>
+      <span class="nav-label">السرايا</span>
+    </button>
+    <button class="nav-item" id="navExport" onclick="openExportSheet('الكل')">
+      <div class="nav-pill"></div>
+      <div class="nav-icon">📦</div>
+      <span class="nav-label">تصدير</span>
+    </button>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openExportSheet(currentFilter)" title="تصدير">📤</button>
+
+<script>
+/* =========================================================
+   DATA
+========================================================= */
+const UNITS = ["إدارة","سرية مشاة1","سرية مشاة2","سرية مشاة3","سرية مشاة4"];
+const UCOLS = ["#d4a843","#00c6a7","#4a9eff","#c77dff","#ff7b54"];
+const UCLS  = ["u0","u1","u2","u3","u4"];
+
+const PERSONNEL = [
+  {id:1,name:"حسان علي الحمد",mid:"c190724",unit:"إدارة"},
+  {id:2,name:"أمين عمير الفدعوس",mid:"2176941",unit:"إدارة"},
+  {id:3,name:"عبداللطيف فايز البعاج",mid:"6348355",unit:"إدارة"},
+  {id:4,name:"أنور خليل العساف",mid:"4031993",unit:"إدارة"},
+  {id:5,name:"حسين صالح الحسين",mid:"4783926",unit:"إدارة"},
+  {id:6,name:"محمد جدوع العلي الحسن",mid:"c163824",unit:"إدارة"},
+  {id:7,name:"عبدالرحمن محمد الحسين",mid:"2953744",unit:"إدارة"},
+  {id:8,name:"خليل محمد الفاضل",mid:"3930986",unit:"إدارة"},
+  {id:9,name:"عزالدين حجي الخاير",mid:"6268420",unit:"إدارة"},
+  {id:10,name:"عبد الرزاق ابراهيم العبدالله",mid:"1400435",unit:"إدارة"},
+  {id:11,name:"سليمان عبد الفاضل",mid:"8920637",unit:"إدارة"},
+  {id:12,name:"رياض لاحج الطبخان",mid:"c163451",unit:"إدارة"},
+  {id:13,name:"حمد اسود المحمد",mid:"5707381",unit:"إدارة"},
+  {id:14,name:"محمد حسن الحسين",mid:"5560247",unit:"سرية مشاة1"},
+  {id:15,name:"عبد الله حمود الفاضل",mid:"3789688",unit:"سرية مشاة1"},
+  {id:16,name:"عبد الرحمن رمضان الحمد",mid:"3353210",unit:"سرية مشاة1"},
+  {id:17,name:"أحمد الخلف العيدالكريم",mid:"c180868",unit:"سرية مشاة1"},
+  {id:18,name:"علي محمود الفاضل",mid:"c180695",unit:"سرية مشاة1"},
+  {id:19,name:"سليمان غسان الجراد",mid:"c163473",unit:"سرية مشاة1"},
+  {id:20,name:"جهاد نعمة الأحمد",mid:"9294968",unit:"سرية مشاة1"},
+  {id:21,name:"احمد لاحج الطبخان",mid:"6314118",unit:"سرية مشاة1"},
+  {id:22,name:"اسماعيل علي المحمد",mid:"2985557",unit:"سرية مشاة1"},
+  {id:23,name:"احمد يحيى الحمد",mid:"c173786",unit:"سرية مشاة1"},
+  {id:24,name:"عمر حسن الحسين",mid:"9104637",unit:"سرية مشاة1"},
+  {id:25,name:"احمد حطاب العبد",mid:"7418225",unit:"سرية مشاة1"},
+  {id:26,name:"إسماعيل صالح المحمد",mid:"9053380",unit:"سرية مشاة1"},
+  {id:27,name:"خليل حميد الحمدان",mid:"5389957",unit:"سرية مشاة1"},
+  {id:28,name:"عويد حمد المحمد",mid:"c163713",unit:"سرية مشاة1"},
+  {id:29,name:"خلف نعمة الاحمد",mid:"8596082",unit:"سرية مشاة1"},
+  {id:30,name:"عبود أحمد عيد",mid:"c180906",unit:"سرية مشاة1"},
+  {id:31,name:"علي نجم العلي",mid:"8212838",unit:"سرية مشاة1"},
+  {id:32,name:"عبد الله عيسى المحمد",mid:"c190723",unit:"سرية مشاة1"},
+  {id:33,name:"محمود عيد الحمود",mid:"c180694",unit:"سرية مشاة1"},
+  {id:34,name:"أسامة حسن الصديان",mid:"8573335",unit:"سرية مشاة1"},
+  {id:35,name:"رعد عيسى الخلف",mid:"9613523",unit:"سرية مشاة1"},
+  {id:36,name:"محمد عبد الجاسم",mid:"c163857",unit:"سرية مشاة1"},
+  {id:37,name:"فيصل علي الحسين",mid:"c180780",unit:"سرية مشاة1"},
+  {id:38,name:"محمود فرج المحمد",mid:"c180688",unit:"سرية مشاة1"},
+  {id:39,name:"محمد فاضل العليان",mid:"c163881",unit:"سرية مشاة2"},
+  {id:40,name:"عبدالله رمضان المصطفى",mid:"9229564",unit:"سرية مشاة2"},
+  {id:41,name:"محمود عبدالله الحسين",mid:"7388503",unit:"سرية مشاة2"},
+  {id:42,name:"احمد محمد الفاضل",mid:"6816293",unit:"سرية مشاة2"},
+  {id:43,name:"محمد أحمد الشيخ",mid:"5007516",unit:"سرية مشاة2"},
+  {id:44,name:"نورالدين محمود القاسم",mid:"8323975",unit:"سرية مشاة2"},
+  {id:45,name:"نصر الله احمد حميد",mid:"6604867",unit:"سرية مشاة2"},
+  {id:46,name:"عيسى ابراهيم العبدالله",mid:"c180885",unit:"سرية مشاة2"},
+  {id:47,name:"جمال خضر الخلف",mid:"4831526",unit:"سرية مشاة2"},
+  {id:48,name:"عبدالله حميد العبد",mid:"7868498",unit:"سرية مشاة2"},
+  {id:49,name:"ياسين صالح العبدالله",mid:"c180737",unit:"سرية مشاة2"},
+  {id:50,name:"احمد ابراهيم المحمد",mid:"c180740",unit:"سرية مشاة2"},
+  {id:51,name:"خالد غسان الجراد",mid:"c163398",unit:"سرية مشاة2"},
+  {id:52,name:"عبدالطيف حمود الذياب",mid:"c180881",unit:"سرية مشاة2"},
+  {id:53,name:"محمد عماد الحسن",mid:"c163876",unit:"سرية مشاة2"},
+  {id:54,name:"جاسم حسين العلي",mid:"5207295",unit:"سرية مشاة2"},
+  {id:55,name:"خليل حسن الصديان",mid:"2479503",unit:"سرية مشاة2"},
+  {id:56,name:"عيسى علي العبدالله",mid:"1919335",unit:"سرية مشاة2"},
+  {id:57,name:"سليمان جاسم الغدة",mid:"c163470",unit:"سرية مشاة2"},
+  {id:58,name:"حسن فرج المحمد",mid:"c180687",unit:"سرية مشاة2"},
+  {id:59,name:"احمد عواد الشيخ",mid:"2389481",unit:"سرية مشاة2"},
+  {id:60,name:"طه حمد المحمد",mid:"c180734",unit:"سرية مشاة2"},
+  {id:61,name:"سليمان رشيد المشهور",mid:"c161011",unit:"سرية مشاة2"},
+  {id:62,name:"بدران عواد ملامطر",mid:"c163296",unit:"سرية مشاة2"},
+  {id:63,name:"فرحان محمد الفاضل",mid:"c163747",unit:"سرية مشاة3"},
+  {id:64,name:"محمود حمود الحسين",mid:"6143842",unit:"سرية مشاة3"},
+  {id:65,name:"ياسين حمد الصالح",mid:"9908786",unit:"سرية مشاة3"},
+  {id:66,name:"جاسم محمد عزيز الضيف",mid:"1441269",unit:"سرية مشاة3"},
+  {id:67,name:"سعيد علي المصطفى",mid:"c163467",unit:"سرية مشاة3"},
+  {id:68,name:"علاء محمد الاحمد",mid:"c163631",unit:"سرية مشاة3"},
+  {id:69,name:"ابراهيم علي الأحمد",mid:"3620133",unit:"سرية مشاة3"},
+  {id:70,name:"ماجد مخلف الطبخان",mid:"3880400",unit:"سرية مشاة3"},
+  {id:71,name:"خليل محمد المسوج",mid:"8239506",unit:"سرية مشاة3"},
+  {id:72,name:"اسماعيل عبد لله الحسين",mid:"c163280",unit:"سرية مشاة3"},
+  {id:73,name:"جلال خلف الطبخان",mid:"3654790",unit:"سرية مشاة3"},
+  {id:74,name:"خليل محمد الحاجم",mid:"9181384",unit:"سرية مشاة3"},
+  {id:75,name:"عساف احمد الموسى",mid:"9276703",unit:"سرية مشاة3"},
+  {id:76,name:"صالح خلف الخلوف",mid:"7118694",unit:"سرية مشاة3"},
+  {id:77,name:"إسماعيل محمد الموسى",mid:"4286436",unit:"سرية مشاة3"},
+  {id:78,name:"احمد عيد الحمد",mid:"c163286",unit:"سرية مشاة3"},
+  {id:79,name:"اسعد جاسم الغده",mid:"c163289",unit:"سرية مشاة3"},
+  {id:80,name:"عبدالرحيم كسار المحمد",mid:"c163564",unit:"سرية مشاة3"},
+  {id:81,name:"محمد علي الحسين",mid:"5508065",unit:"سرية مشاة3"},
+  {id:82,name:"خلف مرعي الطبخان",mid:"2925607",unit:"سرية مشاة3"},
+  {id:83,name:"عبدالله طه المحمد",mid:"c163579",unit:"سرية مشاة3"},
+  {id:84,name:"حامد حميد الطبخان",mid:"8661730",unit:"سرية مشاة3"},
+  {id:85,name:"حسين محمد السالم",mid:"6800525",unit:"سرية مشاة3"},
+  {id:86,name:"علي لاحج الطبخان",mid:"c163662",unit:"سرية مشاة3"},
+  {id:87,name:"ابراهيم لاحج الطبخان",mid:"4277328",unit:"سرية مشاة3"},
+  {id:88,name:"خالد فرحان الحسين",mid:"5926301",unit:"سرية مشاة4"},
+  {id:89,name:"مصطفى ياسين العلي",mid:"c163949",unit:"سرية مشاة4"},
+  {id:90,name:"علي محمد الفاضل",mid:"4751965",unit:"سرية مشاة4"},
+  {id:91,name:"فواز محمد الحسين",mid:"c163753",unit:"سرية مشاة4"},
+  {id:92,name:"نواف رجب الدبشي",mid:"c180690",unit:"سرية مشاة4"},
+  {id:93,name:"علي أحمد العبدالله",mid:"c163663",unit:"سرية مشاة4"},
+  {id:94,name:"محمد خالد الجبري",mid:"c173787",unit:"سرية مشاة4"},
+  {id:95,name:"قصي محمد المفضي",mid:"3472911",unit:"سرية مشاة4"},
+  {id:96,name:"احمد جدوع الحسن",mid:"c163283",unit:"سرية مشاة4"},
+  {id:97,name:"خليل مطر الخليل",mid:"2933549",unit:"سرية مشاة4"},
+  {id:98,name:"خليل حسين العران",mid:"3648144",unit:"سرية مشاة4"},
+  {id:99,name:"عبد المجيد كسار العبد الله",mid:"9256795",unit:"سرية مشاة4"},
+  {id:100,name:"بشار ابراهيم العبدالله",mid:"c180696",unit:"سرية مشاة4"},
+  {id:101,name:"احمد لؤي العبد",mid:"2288223",unit:"سرية مشاة4"},
+  {id:102,name:"عبد الكريم خلف العبدالله",mid:"c163572",unit:"سرية مشاة4"},
+  {id:103,name:"علي محمد الخلف",mid:"4509355",unit:"سرية مشاة4"},
+  {id:104,name:"ابراهيم خضر العايد",mid:"5494602",unit:"سرية مشاة4"},
+  {id:105,name:"نوفل عبدالمنعم أحمد الجبري",mid:"c180869",unit:"سرية مشاة4"},
+  {id:106,name:"عماش مرعي الطبخان",mid:"c163686",unit:"سرية مشاة4"},
+  {id:107,name:"عبدالرحمن مصعب البوعلي",mid:"c180879",unit:"سرية مشاة4"},
+  {id:108,name:"عبدالحميد كزبري المخلف",mid:"c163553",unit:"سرية مشاة4"},
+  {id:109,name:"عبدالله خضر الفاضل",mid:"c180736",unit:"سرية مشاة4"},
+  {id:110,name:"عيسى علي العران",mid:"3243116",unit:"سرية مشاة4"},
+  {id:111,name:"حمود تركي الحمود",mid:"6039534",unit:"سرية مشاة4"},
+  {id:112,name:"إسماعيل عبد الفاضل",mid:"4004565",unit:"سرية مشاة4"},
+  {id:113,name:"حسين مصعب البوعلي",mid:"N151741",unit:"سرية مشاة4"},
+  {id:114,name:"احمد طه العبدالله",mid:"8963344",unit:"سرية مشاة4"},
+  {id:115,name:"محمد علي الجبر",mid:"c141019",unit:"سرية مشاة4"},
+];
+
+/* =========================================================
+   STATE
+========================================================= */
+const images = {};
+let currentFilter = "الكل";
+let currentNav = "home";
+let searchQuery = "";
+
+function ucol(unit) { return UCOLS[UNITS.indexOf(unit)] || "#00c6a7"; }
+
+/* =========================================================
+   TOAST
+========================================================= */
+let toastTimer;
+function showToast(msg, type="ok") {
+  const w = document.getElementById("toastWrap");
+  const i = document.getElementById("toastInner");
+  i.textContent = msg;
+  i.className = "toast-inner " + type;
+  w.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => w.classList.remove("show"), 2800);
+}
+
+/* =========================================================
+   BOTTOM SHEET
+========================================================= */
+function openSheet(title, bodyHTML) {
+  document.getElementById("sheetTitle").textContent = title;
+  document.getElementById("sheetBody").innerHTML = bodyHTML;
+  document.getElementById("sheetOverlay").classList.add("show");
+  document.getElementById("sheet").classList.add("show");
+}
+function closeSheet() {
+  document.getElementById("sheetOverlay").classList.remove("show");
+  document.getElementById("sheet").classList.remove("show");
+}
+
+/* =========================================================
+   EXPORT SHEET
+========================================================= */
+function openExportSheet(filterUnit) {
+  const units = filterUnit === "الكل" ? UNITS : [filterUnit];
+  const rows = units.map(u => {
+    const total = PERSONNEL.filter(p => p.unit===u).length;
+    const up = PERSONNEL.filter(p => p.unit===u && images[p.id]).length;
+    const col = ucol(u);
+    return `<button class="sheet-item" onclick="closeSheet();exportZip('${u}')">
+      <div class="sheet-item-icon" style="background:${col}22;color:${col}">📦</div>
+      <div class="sheet-item-text">
+        <div class="sheet-item-label">${u}</div>
+        <div class="sheet-item-sub">${up} صورة جاهزة من ${total}</div>
+      </div>
+      <span class="sheet-item-count" style="background:${col}22;color:${col}">${up}</span>
+    </button>`;
+  });
+
+  const allUp = PERSONNEL.filter(p => images[p.id]).length;
+  rows.unshift(`<button class="sheet-item" onclick="closeSheet();exportZip('الكل')">
+    <div class="sheet-item-icon" style="background:rgba(0,198,167,.15);color:#00c6a7">🗂️</div>
+    <div class="sheet-item-text">
+      <div class="sheet-item-label">تصدير الأرشيف الكامل</div>
+      <div class="sheet-item-sub">جميع السرايا — ${allUp} صورة</div>
+    </div>
+    <span class="sheet-item-count">${allUp}</span>
+  </button><div style="height:1px;background:var(--border);margin:4px 20px"></div>`);
+
+  openSheet("تصدير الصور", rows.join(""));
+}
+
+/* =========================================================
+   SEARCH SHEET
+========================================================= */
+function openSearchSheet() {
+  openSheet("بحث عن فرد", `
+    <div style="padding:12px 16px">
+      <input id="searchInput" type="text" placeholder="اسم الفرد أو الرقم العسكري..."
+        oninput="liveSearch(this.value)"
+        style="width:100%;padding:12px 14px;background:var(--surface3);border:1px solid var(--border2);
+               border-radius:12px;color:var(--text);font-size:14px;font-family:'Tajawal',sans-serif;
+               outline:none;direction:rtl;">
+    </div>
+    <div id="searchResults" style="padding:0 8px 12px"></div>
+  `);
+  setTimeout(() => document.getElementById("searchInput")?.focus(), 200);
+}
+
+function liveSearch(q) {
+  const res = document.getElementById("searchResults");
+  if (!q.trim()) { res.innerHTML = ""; return; }
+  const found = PERSONNEL.filter(p =>
+    p.name.includes(q) || p.mid.toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 8);
+  res.innerHTML = found.map(p => {
+    const col = ucol(p.unit);
+    const hasImg = !!images[p.id];
+    return `<button class="sheet-item" onclick="closeSheet();setFilter('${p.unit}');setTimeout(()=>scrollToCard(${p.id}),200)">
+      <div class="sheet-item-icon" style="background:${col}22;font-size:14px;color:${col}">${hasImg?"✅":"👤"}</div>
+      <div class="sheet-item-text">
+        <div class="sheet-item-label">${p.name}</div>
+        <div class="sheet-item-sub">${p.mid} • ${p.unit}</div>
+      </div>
+    </button>`;
+  }).join("") || `<div style="text-align:center;color:var(--muted);padding:24px;font-size:14px">لا نتائج</div>`;
+}
+
+function scrollToCard(id) {
+  const el = document.getElementById("card_" + id);
+  if (el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+/* =========================================================
+   NAV
+========================================================= */
+function setNav(nav) {
+  currentNav = nav;
+  ["home","units","export"].forEach(n => {
+    document.getElementById("nav" + n.charAt(0).toUpperCase() + n.slice(1))?.classList.toggle("active", n===nav);
+  });
+  if (nav === "units") {
+    // scroll to unit summary
+    document.getElementById("unitSummary").scrollIntoView({ behavior:"smooth" });
+  } else if (nav === "export") {
+    openExportSheet("الكل");
+    setNav("home");
+  }
+}
+
+/* =========================================================
+   FILTER
+========================================================= */
+function setFilter(unit) {
+  currentFilter = currentFilter === unit && unit !== "الكل" ? "الكل" : unit;
+  renderChips();
+  renderUnitSummary();
+  renderCards();
+  updateSectionHeader();
+  document.getElementById("scrollBody").scrollTo({ top:0, behavior:"smooth" });
+}
+
+/* =========================================================
+   IMAGE HANDLING
+========================================================= */
+function setImage(id, file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  if (images[id]?.url) URL.revokeObjectURL(images[id].url);
+  const url = URL.createObjectURL(file);
+  images[id] = { url, file };
+
+  // Update thumb
+  const thumb = document.getElementById("thumb_" + id);
+  if (thumb) {
+    thumb.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;"><div class="pcard-thumb-badge">✓</div>`;
+    thumb.classList.add("uploaded");
+  }
+  // Update card border
+  const card = document.getElementById("card_" + id);
+  if (card) card.classList.add("uploaded");
+  // Enable export
+  const expBtn = document.getElementById("exp_" + id);
+  if (expBtn) expBtn.disabled = false;
+  // Show del
+  const delBtn = document.getElementById("del_" + id);
+  if (delBtn) delBtn.style.display = "";
+  // Update upload btn
+  const uplBtn = document.getElementById("upl_" + id);
+  if (uplBtn) uplBtn.textContent = "🔄";
+
+  updateProgress();
+  updateBadge();
+  updateUnitRing(PERSONNEL.find(p=>p.id===id)?.unit);
+}
+
+function removeImage(id) {
+  if (images[id]?.url) URL.revokeObjectURL(images[id].url);
+  delete images[id];
+
+  const thumb = document.getElementById("thumb_" + id);
+  if (thumb) {
+    thumb.innerHTML = `<div class="pcard-thumb-placeholder"><div class="t-icon">📷</div><div class="t-hint">اضغط لرفع</div></div>`;
+    thumb.classList.remove("uploaded");
+  }
+  const card = document.getElementById("card_" + id);
+  if (card) card.classList.remove("uploaded");
+  const expBtn = document.getElementById("exp_" + id);
+  if (expBtn) expBtn.disabled = true;
+  const delBtn = document.getElementById("del_" + id);
+  if (delBtn) delBtn.style.display = "none";
+  const uplBtn = document.getElementById("upl_" + id);
+  if (uplBtn) uplBtn.textContent = "📤";
+
+  updateProgress();
+  updateBadge();
+  updateUnitRing(PERSONNEL.find(p=>p.id===id)?.unit);
+}
+
+function exportSingle(id) {
+  const p = PERSONNEL.find(x=>x.id===id);
+  const img = images[id];
+  if (!img || !p) return;
+  const ext = img.file.name.split(".").pop() || "jpg";
+  const a = document.createElement("a");
+  a.href = img.url; a.download = `${p.mid}.${ext}`; a.click();
+  showToast(`✅ تم تصدير: ${p.mid}.${ext}`);
+}
+
+async function exportZip(unit) {
+  const list = unit==="الكل" ? PERSONNEL : PERSONNEL.filter(p=>p.unit===unit);
+  const withImg = list.filter(p=>images[p.id]);
+  if (!withImg.length) { showToast("لا توجد صور للتصدير", "err"); return; }
+
+  showToast(`⏳ جاري تجهيز ${withImg.length} صورة...`);
+  const zip = new JSZip();
+  const folder = zip.folder(unit==="الكل" ? "الأرشيف_العسكري" : unit);
+  for (const p of withImg) {
+    const img = images[p.id];
+    const ext = img.file.name.split(".").pop() || "jpg";
+    folder.file(`${p.mid}.${ext}`, await img.file.arrayBuffer());
+  }
+  const blob = await zip.generateAsync({ type:"blob" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (unit==="الكل" ? "الأرشيف_الكامل" : unit) + ".zip";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  showToast(`✅ تم تصدير ${withImg.length} صورة`);
+}
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+function updateProgress() {
+  const up = Object.keys(images).length;
+  const total = PERSONNEL.length;
+  document.getElementById("progressFill").style.width = ((up/total)*100) + "%";
+  document.getElementById("progressCount").textContent = `${up} / ${total}`;
+}
+
+function updateBadge() {
+  const up = Object.keys(images).length;
+  const b = document.getElementById("uploadBadge");
+  if (up > 0) { b.style.display = "flex"; b.textContent = up; }
+  else b.style.display = "none";
+}
+
+function updateUnitRing(unit) {
+  if (!unit) return;
+  const total = PERSONNEL.filter(p=>p.unit===unit).length;
+  const up = PERSONNEL.filter(p=>p.unit===unit && images[p.id]).length;
+  const pct = total ? up/total : 0;
+  const r = 13, circ = 2*Math.PI*r;
+  const circle = document.querySelector(`.uc-ring[data-unit="${unit}"] circle.fill`);
+  if (circle) {
+    circle.style.strokeDashoffset = circ*(1-pct);
+    circle.style.stroke = ucol(unit);
+  }
+  const countEl = document.querySelector(`.uc[data-unit="${unit}"] .uc-count`);
+  if (countEl) countEl.textContent = `${up}/${total}`;
+}
+
+/* =========================================================
+   RENDER CHIPS
+========================================================= */
+function renderChips() {
+  const chips = ["الكل", ...UNITS];
+  document.getElementById("chipScroll").innerHTML = chips.map((u,i) => {
+    const col = i===0 ? "#00c6a7" : UCOLS[i-1];
+    const isActive = currentFilter === u;
+    return `<button class="chip${isActive?" active":""}"
+      style="${isActive ? `background:${col};border-color:${col};color:#0f1923` : ""}"
+      onclick="setFilter('${u}')">${u}</button>`;
+  }).join("");
+}
+
+/* =========================================================
+   RENDER UNIT SUMMARY
+========================================================= */
+function renderUnitSummary() {
+  const r = 13, circ = 2*Math.PI*r;
+  document.getElementById("unitSummary").innerHTML = UNITS.map((u,i) => {
+    const col = UCOLS[i];
+    const total = PERSONNEL.filter(p=>p.unit===u).length;
+    const up = PERSONNEL.filter(p=>p.unit===u && images[p.id]).length;
+    const pct = total ? up/total : 0;
+    const offset = circ*(1-pct);
+    const isActive = currentFilter === u;
+    return `<div class="uc${isActive?" active":""}" data-unit="${u}" style="--uc-col:${col}" onclick="setFilter('${u}')">
+      <div class="uc-name">${u}</div>
+      <div class="uc-stats">
+        <span class="uc-count">${up}/${total}</span>
+        <div class="uc-ring" data-unit="${u}">
+          <svg width="32" height="32" viewBox="0 0 32 32">
+            <circle cx="16" cy="16" r="${r}" fill="none" stroke="${col}22" stroke-width="3"/>
+            <circle class="fill" cx="16" cy="16" r="${r}" fill="none" stroke="${col}" stroke-width="3"
+              stroke-linecap="round"
+              stroke-dasharray="${circ}"
+              stroke-dashoffset="${offset}"
+              style="transition:stroke-dashoffset 0.5s ease"/>
+          </svg>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   RENDER CARDS
+========================================================= */
+function renderCards() {
+  const list = currentFilter==="الكل" ? PERSONNEL : PERSONNEL.filter(p=>p.unit===currentFilter);
+  const container = document.getElementById("cardsList");
+
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="e-icon">🪖</div><div class="e-text">لا يوجد أفراد</div></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map((p, idx) => {
+    const col = ucol(p.unit);
+    const colBg = col + "22";
+    const hasImg = !!images[p.id];
+    const thumbContent = hasImg
+      ? `<img src="${images[p.id].url}" style="width:100%;height:100%;object-fit:cover;"><div class="pcard-thumb-badge">✓</div>`
+      : `<div class="pcard-thumb-placeholder"><div class="t-icon">📷</div><div class="t-hint">اضغط لرفع</div></div>`;
+
+    return `<div class="pcard${hasImg?" uploaded":""}" id="card_${p.id}"
+      style="--pc:${col};--pc-bg:${colBg};animation-delay:${Math.min(idx*0.03,0.3)}s">
+      <div class="pcard-inner">
+
+        <!-- Actions (right side for RTL) -->
+        <div class="pcard-actions">
+          <button class="pact" id="upl_${p.id}" onclick="document.getElementById('inp_${p.id}').click()" title="رفع">${hasImg?"🔄":"📤"}</button>
+          <button class="pact primary" id="exp_${p.id}" ${hasImg?"":"disabled"} onclick="exportSingle(${p.id})" title="تصدير">⬇️</button>
+          <button class="pact del" id="del_${p.id}" style="display:${hasImg?"":"none"}" onclick="removeImage(${p.id})" title="حذف">🗑️</button>
+        </div>
+
+        <!-- Info -->
+        <div class="pcard-info">
+          <div class="pcard-name">${p.name}</div>
+          <div class="pcard-meta">
+            <span class="pcard-mid">${p.mid}</span>
+            <span class="pcard-unit">${p.unit}</span>
+          </div>
+          <div class="pcard-num">#${p.id}</div>
+        </div>
+
+        <!-- Thumb -->
+        <div class="pcard-thumb${hasImg?" uploaded":""}" id="thumb_${p.id}"
+          onclick="document.getElementById('inp_${p.id}').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event,${p.id})">
+          ${thumbContent}
+        </div>
+
+      </div>
+      <input type="file" accept="image/*" id="inp_${p.id}" class="hidden-input" onchange="handleInput(event,${p.id})">
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+function updateSectionHeader() {
+  const list = currentFilter==="الكل" ? PERSONNEL : PERSONNEL.filter(p=>p.unit===currentFilter);
+  document.getElementById("sectionTitle").textContent = currentFilter==="الكل" ? "جميع الأفراد" : currentFilter;
+  document.getElementById("sectionCount").textContent = `${list.length} فرد`;
+}
+
+/* =========================================================
+   EVENT HANDLERS
+========================================================= */
+function handleInput(e, id) {
+  const file = e.target.files[0];
+  if (file) setImage(id, file);
+  e.target.value = "";
+}
+function handleDrop(e, id) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag");
+  const file = e.dataTransfer.files[0];
+  if (file) setImage(id, file);
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+renderChips();
+renderUnitSummary();
+renderCards();
+updateSectionHeader();
+updateProgress();
+</script>
+
+<!-- ===================== INSTALL BANNER ===================== -->
+<div id="installBanner" style="
+  display:none;
+  position:fixed;
+  bottom:calc(var(--nav-h) + 80px + env(safe-area-inset-bottom,0px));
+  left:12px; right:12px;
+  background:#162030;
+  border:1px solid #2a3f55;
+  border-radius:16px;
+  padding:14px 16px;
+  align-items:center;
+  gap:12px;
+  z-index:500;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  animation: fadeSlideIn 0.3s ease both;
+">
+  <img src="icons/icon-96.png" style="width:42px;height:42px;border-radius:10px;flex-shrink:0;" onerror="this.style.display='none'">
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:13px;font-weight:700;color:#e8f0fe;">ثبّت التطبيق</div>
+    <div style="font-size:11px;color:#5a7a96;margin-top:2px;">للوصول السريع بدون متصفح</div>
+  </div>
+  <button onclick="triggerInstall()" style="
+    background:linear-gradient(135deg,#00c6a7,#009e85);
+    color:#0f1923;font-weight:700;font-size:12px;
+    border:none;border-radius:10px;padding:8px 14px;cursor:pointer;
+    font-family:'Tajawal',sans-serif;white-space:nowrap;flex-shrink:0;">
+    تثبيت
+  </button>
+  <button onclick="hideInstallBanner()" style="
+    background:transparent;border:none;color:#5a7a96;
+    font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
+</div>
+
+<!-- ===================== PWA SERVICE WORKER + INSTALL ===================== -->
+<script>
+/* --- Service Worker Registration --- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => console.log('[PWA] SW registered, scope:', reg.scope))
+      .catch(err => console.warn('[PWA] SW registration failed:', err));
+  });
+}
+
+/* --- Install Prompt (Android Add to Home Screen) --- */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds if not already installed
+  setTimeout(() => {
+    if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+      showInstallBanner();
+    }
+  }, 3000);
+});
+
+function showInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function hideInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+async function triggerInstall() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  hideInstallBanner();
+  if (outcome === 'accepted') showToast('✅ تم تثبيت التطبيق');
+}
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  hideInstallBanner();
+  showToast('✅ تم تثبيت شام كاش بنجاح');
+});
+
+/* --- Detect standalone mode (running as installed app) --- */
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+
+if (isStandalone) {
+  document.documentElement.classList.add('standalone-mode');
+}
+
+/* --- Handle back button on Android --- */
+window.addEventListener('popstate', (e) => {
+  const sheet = document.getElementById('sheet');
+  if (sheet && sheet.classList.contains('show')) {
+    closeSheet();
+    history.pushState(null, '', window.location.href);
+  }
+});
+
+// Push a state so back button can be intercepted
+history.pushState(null, '', window.location.href);
+</script>
+
+</body>
+</html>
