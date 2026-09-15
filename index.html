@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مُجهّز أسئلة الامتحان</title>
+<title>مُجهّز صفحة الأسئلة</title>
 <style>
   :root{
-    --ink:#1b2430;
+    --ink:#1c2431;
     --paper:#fbfaf7;
-    --line:#243b53;
-    --accent:#a3231f;
-    --accent-2:#1f5c99;
+    --line:#22304a;
+    --accent:#9c2b27;
+    --accent-2:#1f5c86;
     --muted:#6b7280;
     --panel:#ffffff;
     --bg:#eef1f5;
@@ -87,6 +87,10 @@
     display:none; background:#fdeceb; border:1px solid #f3c6c2; color:#7a231f;
     border-radius:10px; padding:12px 14px; font-size:.85rem; margin-top:12px; line-height:1.7;
   }
+  .fit-note{
+    display:none; background:#fff8e1; border:1px solid #f1dfa0; color:#7a5c00;
+    border-radius:10px; padding:10px 14px; font-size:.8rem; margin:0 0 12px; line-height:1.6;
+  }
 
   details.debug{margin-top:12px; font-size:.78rem; color:var(--muted);}
   details.debug textarea{width:100%; min-height:110px; font-family:monospace; font-size:.72rem; margin-top:6px;}
@@ -97,58 +101,55 @@
   }
   .toolbar span.lbl{width:100%; font-size:.78rem; color:var(--muted); margin-bottom:2px;}
 
-  /* ===== Exam page replica ===== */
+  /* ===== Exam page replica — every .page is forced to fit ONE real A4 sheet ===== */
   .sheet-outer{
     background:#dfe6ee; border-radius:10px; padding:18px 10px; overflow-x:auto;
   }
   .page{
-    width:210mm; min-height:297mm; margin:0 auto 22px; background:#fff;
-    border:7px double #1f5c99; padding:9mm 10mm; position:relative;
-    font-size:12.5px; line-height:1.55; direction:rtl;
+    width:210mm; height:297mm; margin:0 auto 22px; background:#fff;
+    border:4px double var(--line); padding:13mm 14mm; position:relative;
+    overflow:hidden; /* guarantees the rendered sheet never exceeds one A4 page */
+    font-size:calc(12.5px * var(--scale, 1));
+    line-height:1.5; direction:rtl;
   }
   .title-box{
-    border:3px double var(--accent); text-align:center; padding:6px 10px;
-    font-weight:700; font-size:1.05rem; margin-bottom:10px; position:relative;
+    border:3px double var(--accent); text-align:center; padding:.45em .7em;
+    font-weight:700; font-size:1.15em; margin-bottom:.7em; position:relative;
   }
-  .title-box .badge{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:20px;height:20px;border-radius:50%; background:#ffe066;
-    font-size:.8rem; font-weight:800; margin-inline-start:6px; border:1px solid #d8b800;
-  }
-  .block{position:relative; margin:5px 0; padding:3px 4px; border-radius:6px;}
+  .block{position:relative; margin:.35em 0; padding:.2em .25em; border-radius:6px;}
   .block:hover{outline:1px dashed #c9d3e0;}
   .block .controls{
     position:absolute; inset-inline-end:-4px; top:-4px; display:none; gap:3px; z-index:5;
   }
   .block:hover .controls{display:flex;}
   .ctrl-btn{
-    width:22px;height:22px; border:none; border-radius:5px; background:#1b2430; color:#fff;
-    font-size:.72rem; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;
+    width:20px;height:20px; border:none; border-radius:5px; background:#1b2430; color:#fff;
+    font-size:.68rem; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;
   }
   .ctrl-btn.del{background:var(--accent);}
 
-  .b-section{ color:var(--accent); font-weight:800; font-size:.92rem; margin:10px 0 5px; outline:none;}
-  .b-subhead{ color:var(--accent-2); font-weight:700; font-size:.88rem; margin:2px 0 8px; outline:none;}
-  .b-paragraph{ margin:5px 0; outline:none;}
-  .b-source{ font-weight:700; font-size:.85rem; margin:4px 0 10px; outline:none;}
+  .b-section{ color:var(--accent); font-weight:800; font-size:1.05em; margin:.7em 0 .35em; outline:none; border-bottom:1px solid #e7dcd8; padding-bottom:.15em;}
+  .b-subhead{ color:var(--accent-2); font-weight:700; font-size:1em; margin:.15em 0 .55em; outline:none;}
+  .b-paragraph{ margin:.35em 0; outline:none;}
+  .b-source{ font-weight:700; font-size:.92em; margin:.3em 0 .7em; outline:none;}
 
-  .b-question{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; margin:4px 0;}
+  .b-question{ display:flex; justify-content:space-between; gap:.7em; align-items:baseline; margin:.3em 0;}
   .b-question .qtext{flex:1; outline:none;}
   .b-question .qpts{font-weight:700; white-space:nowrap; outline:none; direction:ltr;}
 
-  .b-options{ display:flex; gap:18px; flex-wrap:wrap; padding-inline-start:26px; margin:2px 0 9px;}
+  .b-options{ display:flex; gap:1.3em; flex-wrap:wrap; padding-inline-start:1.8em; margin:.15em 0 .65em;}
   .b-options span{font-weight:700; outline:none;}
   .b-options span.o0{color:#000;}
-  .b-options span.o1{color:#1f5c99;}
+  .b-options span.o1{color:#1f5c86;}
   .b-options span.o2{color:#1a7a3c;}
   .b-options span.o3{color:#8b2c6e;}
 
-  table.b-table{width:100%; border-collapse:collapse; margin:8px 0;}
-  table.b-table td{border:1px solid #000; padding:5px 8px; font-size:.85rem; vertical-align:top; outline:none;}
-  table.b-table td.letter{width:24px; font-weight:700; color:#1f5c99;}
+  table.b-table{width:100%; border-collapse:collapse; margin:.55em 0;}
+  table.b-table td{border:1px solid #000; padding:.35em .55em; font-size:.9em; vertical-align:top; outline:none;}
+  table.b-table td.letter{width:1.6em; font-weight:700; color:#1f5c86; text-align:center;}
 
-  .b-closing{ text-align:center; border-top:1px dashed #000; padding-top:8px; margin-top:14px; color:var(--accent); font-weight:700; outline:none;}
-  .b-blank{ margin:8px 0; outline:none;}
+  .b-closing{ text-align:center; border-top:1px dashed #000; padding-top:.55em; margin-top:1em; color:var(--accent); font-weight:700; outline:none;}
+  .b-blank{ margin:.55em 0; outline:none;}
 
   .page-break-marker{
     text-align:center; color:#9aa4b2; font-size:.75rem; margin:14px 0;
@@ -162,21 +163,21 @@
   .export-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
 
   @media (max-width:720px){
-    .page{width:100%; min-height:auto; padding:14px; font-size:11.5px;}
+    .page{width:100%; height:auto; aspect-ratio:210/297; padding:9mm; }
     .sheet-outer{padding:10px 4px;}
   }
 
   @media print{
     header.app, .steps, .toolbar, .export-row, .no-print, #panelCapture, #panelExport,
-    .panel h2, .panel .hint{display:none !important;}
+    .panel h2, .panel .hint, .fit-note{display:none !important;}
     .panel:not(.print-target){display:none !important;}
     body{background:#fff;}
     .wrap{margin:0; padding:0; max-width:none;}
     .panel.print-target{box-shadow:none; padding:0; border-radius:0; margin:0;}
     .sheet-outer{background:#fff; padding:0;}
     .page{
-      box-shadow:none; margin:0; width:auto; min-height:100vh;
-      page-break-after:always; border-width:4px;
+      box-shadow:none; margin:0; width:auto; height:297mm;
+      page-break-after:always; border-width:3px;
     }
     .block .controls{display:none !important;}
     .block:hover{outline:none;}
@@ -187,7 +188,7 @@
 
 <header class="app">
   <h1>مُجهّز صفحة الأسئلة</h1>
-  <p>صوّر ورقة الامتحان، ودعه يجهّز لك نسخة منسّقة جاهزة للتحميل</p>
+  <p>صوّر ورقة الامتحان، ودعه يجهّز لك نسخة منسّقة على صفحة A4 واحدة، جاهزة للتحميل</p>
 </header>
 
 <div class="wrap">
@@ -202,7 +203,7 @@
   <!-- STEP 1: capture -->
   <section class="panel" id="panelCapture">
     <h2>١. صوّر ورقة الأسئلة</h2>
-    <p class="hint">التقط صورة واضحة ومستقيمة لصفحة الأسئلة (إضاءة جيدة، بدون ظل يغطي النص). يمكنك إضافة أكثر من صورة إذا كان الامتحان من عدة صفحات — كل صورة تُضاف كصفحة جديدة في الملف النهائي.</p>
+    <p class="hint">التقط صورة واضحة ومستقيمة لصفحة الأسئلة (إضاءة جيدة، بدون ظل يغطي النص). كل صورة تُستخرج تلقائياً على صفحة A4 واحدة منفصلة ومنسّقة — إذا كان الامتحان من عدة صفحات، أضف صورة لكل صفحة.</p>
     <div class="capture-row">
       <button class="btn btn-primary" id="btnCamera">📷 التقاط بالكاميرا</button>
       <button class="btn btn-secondary" id="btnGallery">🖼️ اختيار من المعرض</button>
@@ -226,7 +227,9 @@
   <!-- STEP 3: structured preview -->
   <section class="panel print-target" id="panelPreview" style="display:none;">
     <h2>٣. راجع وعدّل الصفحة</h2>
-    <p class="hint">اضغط على أي نص لتعديله مباشرة. استخدم الأزرار الصغيرة فوق كل عنصر (عند تمرير الفأرة/اللمس) للحذف أو تحريك العنصر. استخدم الأزرار أدناه لإضافة عناصر جديدة في أي مكان — التحليل الآلي قد يخطئ أحياناً في كلمة أو ترتيب، فراجع النتيجة قبل التحميل.</p>
+    <p class="hint">اضغط على أي نص لتعديله مباشرة. استخدم الأزرار الصغيرة فوق كل عنصر (عند تمرير الفأرة/اللمس) للحذف أو تحريك العنصر. كل صفحة تُصغَّر تلقائياً بأقل قدر ممكن حتى يبقى كل محتواها داخل ورقة A4 واحدة فقط.</p>
+
+    <div class="fit-note" id="fitNote">تم تصغير حجم الخط تلقائياً ليتّسع كامل المحتوى داخل صفحة A4 واحدة. لو رغبت بخط أكبر، احذف بعض العناصر الأقل أهمية.</div>
 
     <div class="toolbar" id="toolbar">
       <span class="lbl">إضافة عنصر جديد إلى نهاية الصفحة الحالية:</span>
@@ -239,7 +242,7 @@
       <button class="btn btn-ghost btn-sm" data-add="table">+ جدول</button>
       <button class="btn btn-ghost btn-sm" data-add="blank">+ سطر فراغات للترقيم</button>
       <button class="btn btn-ghost btn-sm" data-add="closing">+ سطر ختامي</button>
-      <button class="btn btn-secondary btn-sm" id="btnNewPage">+ صفحة جديدة ↩</button>
+      <button class="btn btn-secondary btn-sm" id="btnNewPage">+ صفحة A4 جديدة ↩</button>
     </div>
 
     <div class="sheet-outer">
@@ -254,15 +257,16 @@
   <!-- STEP 4: export -->
   <section class="panel" id="panelExport" style="display:none;">
     <h2>٤. تحميل الملف النهائي</h2>
-    <p class="hint">نزّل الصفحة كملف Word جاهز للتعديل في Word، أو اطبعها مباشرة كـ PDF من نافذة الطباعة.</p>
+    <p class="hint">نزّل الصفحة كملف Word حقيقي (.docx) — يفتح ويتحرر بشكل صحيح على تطبيق Word للأندرويد وللآيفون وللكمبيوتر — أو اطبعها مباشرة كـ PDF من نافذة الطباعة.</p>
     <div class="export-row">
-      <button class="btn btn-primary" id="btnExportWord">⬇️ تحميل Word (.doc)</button>
+      <button class="btn btn-primary" id="btnExportDocx">⬇️ تحميل Word (.docx)</button>
       <button class="btn btn-secondary" id="btnPrint">🖨️ طباعة / حفظ PDF</button>
     </div>
   </section>
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -271,6 +275,9 @@
   let currentFile = null;
   /** pages: array of pages, each page is array of blocks */
   let pages = [[]];
+  /** pageScales: the auto-fit font scale (0.6–1) actually used on screen for each page,
+   *  reused when building the Word export so the exported page matches the preview. */
+  let pageScales = [1];
 
   const $ = sel => document.querySelector(sel);
 
@@ -304,7 +311,7 @@
     $('#debugBox').style.display = 'none';
   }
 
-  // ---------- Step 2: analyze with vision ----------
+  // ---------- Step 2: analyze with vision (Claude, directly from the browser) ----------
   $('#btnExtract').addEventListener('click', analyzeImage);
 
   function fileToBase64(file){
@@ -316,12 +323,22 @@
     });
   }
 
-  // ملاحظة: صار التحليل يتم عبر سيرفر بروكسي خاص بك (/api/analyze)
-  // بدل استدعاء api.anthropic.com مباشرة من المتصفح — هيك ما في مفتاح API
-  // أو تعليمات التحليل ظاهرة بكود الصفحة.
-
-  // إذا فعّلت الحماية البسيطة (APP_SECRET) على السيرفر، حط نفس القيمة هون:
-  const APP_SECRET = ''; // مثال: 'my-secret-123' — خلّيه فاضي إذا ما فعّلت الحماية
+  const PROMPT = [
+    "You are reading a photographed page of a school exam. The page mixes Arabic instructions/headers with French exam content (or is fully Arabic).",
+    "Extract the page content as a JSON array of blocks describing the page top to bottom, in original reading order. Output ONLY the raw JSON array — no explanation, no markdown code fences, no extra text before or after. Keep it compact: this is one A4 page, so be economical with block count.",
+    "Use these block shapes (short keys), and ONLY these:",
+    '{"t":"heading","x":"<full boxed page title text>"}',
+    '{"t":"section","x":"<a bold section header line, e.g. \\"I- Compréhension écrite :\\" or a page label>"}',
+    '{"t":"subhead","x":"<a secondary bold instruction line>"}',
+    '{"t":"paragraph","x":"<a body paragraph, verbatim>"}',
+    '{"t":"source","x":"<a short line like a website/source or a note>"}',
+    '{"t":"question","n":"<number as string>","x":"<question text; use ……… for blanks>","p":"<points exactly as written, e.g. \\"(10 Pts.)\\", or \\"\\" if none>"}',
+    '{"t":"options","o":["a. ...","b. ...","c. ...","d. ..."]}',
+    '{"t":"table","r":[["a","..."],["b","..."]]}',
+    '{"t":"blank","x":"<a line of numbered blanks for ordering answers>"}',
+    '{"t":"closing","x":"<a final centered line if present, e.g. \\"انتهت الأسئلة\\">"}',
+    "Rules: copy every piece of text EXACTLY as written (same language, punctuation, quotes «»), no translation, no summarizing, no adding anything not visible on the page. Keep JSON compact (minimal whitespace)."
+  ].join("\n");
 
   async function analyzeImage(){
     if(!currentFile) return;
@@ -334,18 +351,25 @@
       const base64Data = await fileToBase64(currentFile);
       const mediaType = currentFile.type && currentFile.type.startsWith('image/') ? currentFile.type : 'image/jpeg';
 
-      const headers = { "Content-Type": "application/json" };
-      if(APP_SECRET) headers["X-App-Secret"] = APP_SECRET;
-
-      const response = await fetch("/api/analyze", {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers,
-        body: JSON.stringify({ image: base64Data, mediaType })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType, data: base64Data } },
+              { type: "text", text: PROMPT }
+            ]
+          }]
+        })
       });
 
       const data = await response.json();
       if(!response.ok){
-        throw new Error(data && data.error ? data.error : ("HTTP " + response.status));
+        throw new Error(data && data.error && data.error.message ? data.error.message : ("HTTP " + response.status));
       }
       const textParts = (data.content || []).filter(c => c.type === 'text').map(c => c.text);
       const rawText = textParts.join('\n').trim();
@@ -361,6 +385,7 @@
         pages[pages.length-1] = blocks;
       } else {
         pages.push(blocks);
+        pageScales.push(1);
       }
 
       activateStep(3);
@@ -378,7 +403,6 @@
         (err && err.message ? '(' + err.message + ') ' : '') +
         'تأكد أن الصورة واضحة وأن الاتصال بالإنترنت متوفر، ثم أعد المحاولة. ' +
         'يمكنك أيضاً بناء الصفحة يدوياً باستخدام أزرار الإضافة في خطوة المراجعة.';
-      // still let the user proceed manually
       activateStep(3);
       $('#panelPreview').style.display = 'block';
       $('#panelExport').style.display = 'block';
@@ -396,14 +420,12 @@
     const start = s.indexOf('[');
     if(start > 0) s = s.slice(start);
     try{ return JSON.parse(s); }catch(e){}
-    // try trimming to the last complete object
     const lastComma = s.lastIndexOf('},');
     if(lastComma > -1){
       let repaired = s.slice(0, lastComma+1) + ']';
       if(!repaired.trim().startsWith('[')) repaired = '[' + repaired;
       try{ return JSON.parse(repaired); }catch(e){}
     }
-    // last resort: parse each {...} object individually
     const matches = s.match(/\{[^{}]*(?:\[[^\[\]]*\][^{}]*)*\}/g) || [];
     const out = [];
     matches.forEach(m => { try{ out.push(JSON.parse(m)); }catch(e){} });
@@ -440,11 +462,13 @@
       sheet.innerHTML = '<div class="empty-state">لا يوجد محتوى بعد — حلّل صورة أو أضف عناصر يدوياً.</div>';
       return;
     }
+    let anyShrunk = false;
     pages.forEach((blocks, pIdx) => {
       const pageEl = document.createElement('div');
       pageEl.className = 'page';
       pageEl.dataset.page = pIdx;
-      blocks.forEach((b, bIdx) => pageEl.appendChild(renderBlock(b, pIdx, bIdx)));
+      pageEl.style.setProperty('--scale', 1);
+      blocks.forEach((b, bIdx) => pageEl.appendChild(renderBlock(b, pIdx, bIdx, pageEl)));
       if(blocks.length === 0){
         const e = document.createElement('div');
         e.className = 'empty-state';
@@ -459,6 +483,32 @@
         sheet.appendChild(marker);
       }
     });
+    // fit each page to exactly one A4 sheet, after layout has settled
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.page[data-page]').forEach(pageEl => {
+        const pIdx = Number(pageEl.dataset.page);
+        const scale = fitPageToA4(pageEl);
+        pageScales[pIdx] = scale;
+        if(scale < 0.98) anyShrunk = true;
+      });
+      $('#fitNote').style.display = anyShrunk ? 'block' : 'none';
+    });
+  }
+
+  /** Shrinks a .page's font-size (via --scale) until its full content fits within
+   *  one real A4 sheet, so nothing ever spills onto a second page. */
+  function fitPageToA4(pageEl){
+    let scale = 1;
+    const minScale = 0.6;
+    const step = 0.02;
+    let guard = 0;
+    pageEl.style.setProperty('--scale', 1);
+    while(pageEl.scrollHeight > pageEl.clientHeight + 1 && scale > minScale && guard < 40){
+      scale = Math.max(minScale, +(scale - step).toFixed(3));
+      pageEl.style.setProperty('--scale', scale);
+      guard++;
+    }
+    return scale;
   }
 
   function controls(pIdx, bIdx){
@@ -490,13 +540,13 @@
     renderSheet();
   }
 
-  function editable(el, onInput){
+  function editable(el, onInput, pageEl){
     el.setAttribute('contenteditable','true');
-    el.addEventListener('input', onInput);
+    el.addEventListener('input', () => { onInput(); if(pageEl) fitPageToA4(pageEl); });
     return el;
   }
 
-  function renderBlock(b, pIdx, bIdx){
+  function renderBlock(b, pIdx, bIdx, pageEl){
     const box = document.createElement('div');
     box.className = 'block';
     box.appendChild(controls(pIdx,bIdx));
@@ -504,13 +554,9 @@
     if(b.type === 'heading'){
       const div = document.createElement('div');
       div.className = 'title-box';
-      const span = document.createElement('span');
-      span.textContent = b.text;
-      editable(span, () => b.text = span.textContent);
-      const badge = document.createElement('span');
-      badge.className = 'badge';
-      badge.textContent = '1';
-      div.append(span, badge);
+      div.style.direction = dirFor(b.text);
+      div.textContent = b.text;
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'section'){
@@ -519,7 +565,7 @@
       div.style.direction = dirFor(b.text);
       div.style.textAlign = alignFor(b.text);
       div.textContent = b.text;
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'subhead'){
@@ -528,7 +574,7 @@
       div.style.direction = dirFor(b.text);
       div.style.textAlign = alignFor(b.text);
       div.textContent = b.text;
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'paragraph'){
@@ -538,7 +584,7 @@
       div.style.direction = rtl ? 'rtl' : 'ltr';
       div.style.textAlign = rtl ? 'right' : 'justify';
       div.textContent = b.text;
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'source'){
@@ -547,7 +593,7 @@
       div.style.direction = dirFor(b.text);
       div.style.textAlign = alignFor(b.text);
       div.textContent = b.text;
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'question'){
@@ -561,11 +607,11 @@
         const full = qt.textContent;
         const m = full.match(/^(\d{1,2})\.\s*(.*)$/);
         if(m){ b.num = m[1]; b.text = m[2]; } else { b.text = full; }
-      });
+      }, pageEl);
       const qp = document.createElement('div');
       qp.className = 'qpts';
       qp.textContent = b.points || '';
-      editable(qp, () => b.points = qp.textContent);
+      editable(qp, () => b.points = qp.textContent, pageEl);
       div.append(qt, qp);
       box.appendChild(div);
     }
@@ -579,7 +625,7 @@
         const span = document.createElement('span');
         span.className = 'o' + idx;
         span.textContent = opt;
-        editable(span, () => b.opts[idx] = span.textContent);
+        editable(span, () => b.opts[idx] = span.textContent, pageEl);
         div.appendChild(span);
       });
       box.appendChild(div);
@@ -595,11 +641,11 @@
         const tdL = document.createElement('td');
         tdL.className = 'letter';
         tdL.textContent = row[0];
-        editable(tdL, () => b.rows[rIdx][0] = tdL.textContent);
+        editable(tdL, () => b.rows[rIdx][0] = tdL.textContent, pageEl);
         const tdT = document.createElement('td');
         tdT.textContent = row[1];
         tdT.style.textAlign = alignFor(row[1]);
-        editable(tdT, () => b.rows[rIdx][1] = tdT.textContent);
+        editable(tdT, () => b.rows[rIdx][1] = tdT.textContent, pageEl);
         tr.append(tdL, tdT);
         table.appendChild(tr);
       });
@@ -611,7 +657,7 @@
       div.style.direction = 'ltr';
       div.style.textAlign = 'left';
       div.textContent = b.text || '1-…………  2-…………  3-…………  4-…………';
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     else if(b.type === 'closing'){
@@ -619,7 +665,7 @@
       div.className = 'b-closing';
       div.style.direction = dirFor(b.text);
       div.textContent = b.text || 'انتهت الأسئلة';
-      editable(div, () => b.text = div.textContent);
+      editable(div, () => b.text = div.textContent, pageEl);
       box.appendChild(div);
     }
     return box;
@@ -648,11 +694,13 @@
 
   $('#btnNewPage').addEventListener('click', () => {
     pages.push([]);
+    pageScales.push(1);
     renderSheet();
   });
 
   $('#btnAddMorePhoto').addEventListener('click', () => {
     pages.push([]);
+    pageScales.push(1);
     $('#previewThumb').style.display = 'none';
     $('#extractRow').style.display = 'none';
     $('#errorBox').style.display = 'none';
@@ -662,43 +710,260 @@
     window.scrollTo({top:0, behavior:'smooth'});
   });
 
-  // ---------- export: Word ----------
-  $('#btnExportWord').addEventListener('click', exportWord);
+  // ================= export: real .docx (Open XML) =================
+  // Built by hand with JSZip so the file is a genuine Word document —
+  // this is what makes it open and edit correctly in Word for Android
+  // (an HTML file renamed to .doc is read-only at best there, and often
+  // fails outright; a real .docx is fully supported).
 
-  function exportWord(){
-    const sheetHtml = $('#sheet').innerHTML.replace(/<div class="controls no-print">[\s\S]*?<\/div>/g, '');
-    const styleForWord = `
-      body{font-family:Arial, Tahoma, sans-serif;}
-      .page{width:210mm;min-height:297mm;border:7px double #1f5c99;padding:9mm 10mm;margin:0 0 20px;font-size:12.5px;line-height:1.55;}
-      .title-box{border:3px double #a3231f;text-align:center;padding:6px 10px;font-weight:700;font-size:1.05rem;margin-bottom:10px;}
-      .title-box .badge{display:inline-block;width:20px;height:20px;border-radius:50%;background:#ffe066;font-size:.8rem;font-weight:800;margin-inline-start:6px;text-align:center;}
-      .b-section{color:#a3231f;font-weight:800;font-size:.92rem;margin:10px 0 5px;}
-      .b-subhead{color:#1f5c99;font-weight:700;font-size:.88rem;margin:2px 0 8px;}
-      .b-paragraph{margin:5px 0;}
-      .b-source{font-weight:700;font-size:.85rem;margin:4px 0 10px;}
-      .b-question{display:flex;justify-content:space-between;gap:10px;margin:4px 0;}
-      .b-options{display:flex;gap:18px;flex-wrap:wrap;padding-inline-start:26px;margin:2px 0 9px;}
-      .b-options .o0{color:#000;font-weight:700;} .b-options .o1{color:#1f5c99;font-weight:700;}
-      .b-options .o2{color:#1a7a3c;font-weight:700;} .b-options .o3{color:#8b2c6e;font-weight:700;}
-      table.b-table{width:100%;border-collapse:collapse;margin:8px 0;}
-      table.b-table td{border:1px solid #000;padding:5px 8px;font-size:.85rem;}
-      .b-closing{text-align:center;border-top:1px dashed #000;padding-top:8px;margin-top:14px;color:#a3231f;font-weight:700;}
-      .qpts{font-weight:700;white-space:nowrap;}
-    `;
-    const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-    <head><meta charset="utf-8"><title>ورقة الأسئلة</title>
-    <style>${styleForWord}</style></head>
-    <body dir="rtl">${sheetHtml}</body></html>`;
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function halfPt(pt){ return Math.max(12, Math.round(pt * 2)); }
 
-    const blob = new Blob(['\ufeff', html], {type:'application/msword'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ورقة-الأسئلة.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  function rPrXml(o){
+    o = o || {};
+    let s = '<w:rPr>';
+    if(o.bold) s += '<w:b/><w:bCs/>';
+    s += '<w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/>';
+    if(o.color) s += `<w:color w:val="${o.color}"/>`;
+    const sz = halfPt(o.pt || 10.5);
+    s += `<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>`;
+    if(o.rtl) s += '<w:rtl/>';
+    s += '</w:rPr>';
+    return s;
+  }
+  function pPrXml(o){
+    o = o || {};
+    let s = '<w:pPr>';
+    s += `<w:spacing w:before="${o.before||40}" w:after="${o.after||60}" w:line="264" w:lineRule="auto"/>`;
+    if(o.rtl) s += '<w:bidi/>';
+    if(o.align) s += `<w:jc w:val="${o.align}"/>`;
+    if(o.borderTop || o.borderBottom){
+      s += '<w:pBdr>';
+      if(o.borderTop) s += `<w:top w:val="${o.borderTop.val||'single'}" w:sz="${o.borderTop.sz||6}" w:space="4" w:color="${o.borderTop.color||'000000'}"/>`;
+      if(o.borderBottom) s += `<w:bottom w:val="${o.borderBottom.val||'single'}" w:sz="${o.borderBottom.sz||6}" w:space="4" w:color="${o.borderBottom.color||'000000'}"/>`;
+      s += '</w:pBdr>';
+    }
+    s += '</w:pPr>';
+    return s;
+  }
+  function paragraphXml(text, o){
+    o = o || {};
+    const rtl = isArabic(text);
+    const align = o.align || (rtl ? 'right' : (o.ltrAlign || 'left'));
+    let xml = '<w:p>' + pPrXml({rtl, align, borderTop:o.borderTop, borderBottom:o.borderBottom, before:o.before, after:o.after});
+    xml += '<w:r>' + rPrXml({bold:o.bold, color:o.color, pt:o.pt, rtl}) + `<w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+    xml += '</w:p>';
+    return xml;
+  }
+  function emptyParaXml(){ return '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr></w:p>'; }
+
+  const BASE_PT = {heading:14, section:12, subhead:11, paragraph:10.5, source:10, question:10.5, options:10.5, table:10, blank:10.5, closing:11};
+
+  function questionXml(b, scale){
+    const pt = BASE_PT.question * scale;
+    const rtl = isArabic(b.text);
+    const numText = (b.num ? (b.num + '.  ') : '') + b.text;
+    let xml = '<w:tbl><w:tblPr><w:tblW w:type="pct" w:w="5000"/>';
+    if(rtl) xml += '<w:bidiVisual/>';
+    xml += '<w:tblBorders>'
+      + '<w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '<w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '<w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '<w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '<w:insideH w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '<w:insideV w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+      + '</w:tblBorders>'
+      + '<w:tblLayout w:type="fixed"/>'
+      + '<w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar>'
+      + '</w:tblPr>';
+    xml += '<w:tblGrid><w:gridCol w:w="8000"/><w:gridCol w:w="2000"/></w:tblGrid>';
+    xml += '<w:tr>';
+    xml += `<w:tc><w:tcPr><w:tcW w:type="pct" w:w="4000"/></w:tcPr>`
+      + '<w:p>' + pPrXml({rtl, align: rtl?'right':'left', before:0, after:0})
+      + '<w:r>' + rPrXml({pt, rtl}) + `<w:t xml:space="preserve">${esc(numText)}</w:t></w:r></w:p></w:tc>`;
+    xml += `<w:tc><w:tcPr><w:tcW w:type="pct" w:w="1000"/></w:tcPr>`
+      + '<w:p>' + pPrXml({rtl:false, align: rtl?'left':'right', before:0, after:0})
+      + '<w:r>' + rPrXml({bold:true, pt, rtl:false}) + `<w:t xml:space="preserve">${esc(b.points||'')}</w:t></w:r></w:p></w:tc>`;
+    xml += '</w:tr></w:tbl>';
+    return xml;
+  }
+
+  function optionsXml(b, scale){
+    const pt = BASE_PT.options * scale;
+    const opts = (b.opts && b.opts.length) ? b.opts.slice(0,4) : ['a. ...','b. ...','c. ...','d. ...'];
+    const anyText = opts.join(' ');
+    const rtl = isArabic(anyText);
+    const colors = ['000000','1f5c86','1a7a3c','8b2c6e'];
+    let xml = '<w:p>' + pPrXml({rtl, align: rtl?'right':'left', before:30, after:90});
+    opts.forEach((opt, idx) => {
+      if(idx > 0) xml += '<w:r>' + rPrXml({pt, rtl}) + '<w:t xml:space="preserve">      </w:t></w:r>';
+      xml += '<w:r>' + rPrXml({bold:true, color:colors[idx], pt, rtl}) + `<w:t xml:space="preserve">${esc(opt)}</w:t></w:r>`;
+    });
+    xml += '</w:p>';
+    return xml;
+  }
+
+  function dataTableXml(b, scale){
+    const pt = BASE_PT.table * scale;
+    const rows = (b.rows && b.rows.length) ? b.rows : [['a','']];
+    const anyText = rows.map(r => r[1]).join(' ');
+    const rtl = isArabic(anyText);
+    let xml = '<w:tbl><w:tblPr><w:tblW w:type="pct" w:w="5000"/>';
+    if(rtl) xml += '<w:bidiVisual/>';
+    xml += '<w:tblBorders>'
+      + '<w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '<w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '<w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '<w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '<w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/>'
+      + '</w:tblBorders></w:tblPr>';
+    xml += '<w:tblGrid><w:gridCol w:w="700"/><w:gridCol w:w="9300"/></w:tblGrid>';
+    rows.forEach(row => {
+      xml += '<w:tr>';
+      xml += `<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="700"/></w:tcPr>`
+        + '<w:p>' + pPrXml({align:'center', before:20, after:20})
+        + '<w:r>' + rPrXml({bold:true, color:'1f5c86', pt}) + `<w:t xml:space="preserve">${esc(row[0]||'')}</w:t></w:r></w:p></w:tc>`;
+      xml += `<w:tc><w:tcPr><w:tcW w:type="dxa" w:w="9300"/></w:tcPr>`
+        + '<w:p>' + pPrXml({rtl, align: rtl?'right':'left', before:20, after:20})
+        + '<w:r>' + rPrXml({pt, rtl}) + `<w:t xml:space="preserve">${esc(row[1]||'')}</w:t></w:r></w:p></w:tc>`;
+      xml += '</w:tr>';
+    });
+    xml += '</w:tbl>';
+    return xml;
+  }
+
+  function blockToDocxXml(b, scale){
+    switch(b.type){
+      case 'heading':
+        return paragraphXml(b.text, {
+          align:'center', bold:true, pt: BASE_PT.heading*scale,
+          borderTop:{val:'double', sz:8, color:'9c2b27'},
+          borderBottom:{val:'double', sz:8, color:'9c2b27'},
+          before:40, after:140
+        });
+      case 'section':
+        return paragraphXml(b.text, {bold:true, color:'9c2b27', pt: BASE_PT.section*scale, before:160, after:70});
+      case 'subhead':
+        return paragraphXml(b.text, {bold:true, color:'1f5c86', pt: BASE_PT.subhead*scale, before:30, after:110});
+      case 'paragraph': {
+        const rtl = isArabic(b.text);
+        return paragraphXml(b.text, {align: rtl?'right':'both', pt: BASE_PT.paragraph*scale, before:30, after:70});
+      }
+      case 'source':
+        return paragraphXml(b.text, {bold:true, pt: BASE_PT.source*scale, before:30, after:110});
+      case 'question':
+        return questionXml(b, scale) + emptyParaXml();
+      case 'options':
+        return optionsXml(b, scale);
+      case 'table':
+        return dataTableXml(b, scale) + emptyParaXml();
+      case 'blank':
+        return paragraphXml(b.text || '1-…………  2-…………  3-…………  4-…………', {align:'left', pt: BASE_PT.blank*scale, before:60, after:60});
+      case 'closing':
+        return paragraphXml(b.text || 'انتهت الأسئلة', {
+          align:'center', bold:true, color:'9c2b27', pt: BASE_PT.closing*scale,
+          borderTop:{val:'dashed', sz:4, color:'000000'}, before:140, after:0
+        });
+      default:
+        return '';
+    }
+  }
+
+  function buildDocumentXml(){
+    let body = '';
+    pages.forEach((blocks, pIdx) => {
+      const scale = pageScales[pIdx] || 1;
+      if(blocks.length === 0){
+        body += emptyParaXml();
+      } else {
+        blocks.forEach(b => { body += blockToDocxXml(b, scale); });
+      }
+      if(pIdx < pages.length - 1){
+        body += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+      }
+    });
+    body += '<w:sectPr>'
+      + '<w:pgSz w:w="11906" w:h="16838"/>'
+      + '<w:pgMar w:top="510" w:right="567" w:bottom="510" w:left="567" w:header="0" w:footer="0" w:gutter="0"/>'
+      + '<w:docGrid w:linePitch="360"/>'
+      + '</w:sectPr>';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<w:body>' + body + '</w:body></w:document>';
+  }
+
+  const CONTENT_TYPES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    + '<Default Extension="xml" ContentType="application/xml"/>'
+    + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+    + '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'
+    + '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>'
+    + '</Types>';
+
+  const RELS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+    + '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'
+    + '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
+    + '</Relationships>';
+
+  function coreXml(){
+    const now = new Date().toISOString();
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+      + '<dc:title>ورقة الأسئلة</dc:title>'
+      + '<dc:creator>مُجهّز صفحة الأسئلة</dc:creator>'
+      + '<cp:lastModifiedBy>مُجهّز صفحة الأسئلة</cp:lastModifiedBy>'
+      + `<dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created>`
+      + `<dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified>`
+      + '</cp:coreProperties>';
+  }
+  const APP_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+    + '<Application>مُجهّز صفحة الأسئلة</Application></Properties>';
+
+  $('#btnExportDocx').addEventListener('click', exportDocx);
+
+  async function exportDocx(){
+    const btn = $('#btnExportDocx');
+    if(typeof JSZip === 'undefined'){
+      alert('تعذّر تحميل المكوّن اللازم لإنشاء ملف Word. تأكد من اتصالك بالإنترنت وحاول مجدداً.');
+      return;
+    }
+    btn.disabled = true;
+    const originalLabel = btn.textContent;
+    btn.textContent = '⏳ جارٍ التحضير…';
+    try{
+      const zip = new JSZip();
+      zip.file('[Content_Types].xml', CONTENT_TYPES_XML);
+      zip.file('_rels/.rels', RELS_XML);
+      zip.file('docProps/core.xml', coreXml());
+      zip.file('docProps/app.xml', APP_XML);
+      zip.file('word/document.xml', buildDocumentXml());
+      const blob = await zip.generateAsync({
+        type: 'blob',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ورقة-الأسئلة.docx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }catch(err){
+      console.error(err);
+      alert('حدث خطأ أثناء إنشاء ملف Word: ' + (err && err.message ? err.message : err));
+    }finally{
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+    }
   }
 
   // ---------- export: print/PDF ----------
