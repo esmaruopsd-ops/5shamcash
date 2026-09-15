@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>مُجهّز أسئلة الامتحان</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#1b2430;
@@ -19,7 +21,7 @@
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--bg); color:var(--ink);
-    font-family:"Segoe UI","Tahoma","Cairo",system-ui,sans-serif;
+    font-family:"Cairo","Segoe UI","Tahoma",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;
   }
   header.app{
@@ -59,7 +61,7 @@
   .capture-row{display:flex; gap:10px; flex-wrap:wrap;}
   .btn{
     appearance:none; border:none; cursor:pointer; border-radius:10px;
-    padding:11px 18px; font-size:.9rem; font-weight:600;
+    padding:11px 18px; font-size:.9rem; font-weight:600; font-family:inherit;
     display:inline-flex; align-items:center; gap:8px; transition:transform .08s ease, opacity .15s ease;
   }
   .btn:active{transform:scale(.97);}
@@ -97,25 +99,28 @@
   }
   .toolbar span.lbl{width:100%; font-size:.78rem; color:var(--muted); margin-bottom:2px;}
 
-  /* ===== Exam page replica ===== */
+  /* ===== Exam page replica — صفحة A4 واحدة تماماً لكل صورة ===== */
   .sheet-outer{
     background:#dfe6ee; border-radius:10px; padding:18px 10px; overflow-x:auto;
   }
   .page{
-    width:210mm; min-height:297mm; margin:0 auto 22px; background:#fff;
+    --fs:1;
+    width:210mm; height:297mm; margin:0 auto 22px; background:#fff;
     border:7px double #1f5c99; padding:9mm 10mm; position:relative;
-    font-size:12.5px; line-height:1.55; direction:rtl;
+    font-size:calc(12.5px * var(--fs)); line-height:1.6; direction:rtl;
+    overflow:hidden; box-shadow:0 6px 18px -8px rgba(20,30,50,.25);
   }
   .title-box{
-    border:3px double var(--accent); text-align:center; padding:6px 10px;
-    font-weight:700; font-size:1.05rem; margin-bottom:10px; position:relative;
+    border:3px double var(--accent); text-align:center; padding:.4em .7em;
+    font-weight:800; font-size:1.2em; margin-bottom:.7em; position:relative;
+    background:#fffdfb; border-radius:2px;
   }
   .title-box .badge{
     display:inline-flex; align-items:center; justify-content:center;
-    width:20px;height:20px;border-radius:50%; background:#ffe066;
-    font-size:.8rem; font-weight:800; margin-inline-start:6px; border:1px solid #d8b800;
+    width:1.5em;height:1.5em;border-radius:50%; background:#ffe066;
+    font-size:.75em; font-weight:800; margin-inline-start:.4em; border:1px solid #d8b800;
   }
-  .block{position:relative; margin:5px 0; padding:3px 4px; border-radius:6px;}
+  .block{position:relative; margin:.35em 0; padding:3px 4px; border-radius:6px;}
   .block:hover{outline:1px dashed #c9d3e0;}
   .block .controls{
     position:absolute; inset-inline-end:-4px; top:-4px; display:none; gap:3px; z-index:5;
@@ -127,28 +132,56 @@
   }
   .ctrl-btn.del{background:var(--accent);}
 
-  .b-section{ color:var(--accent); font-weight:800; font-size:.92rem; margin:10px 0 5px; outline:none;}
-  .b-subhead{ color:var(--accent-2); font-weight:700; font-size:.88rem; margin:2px 0 8px; outline:none;}
-  .b-paragraph{ margin:5px 0; outline:none;}
-  .b-source{ font-weight:700; font-size:.85rem; margin:4px 0 10px; outline:none;}
+  /* عناوين الأقسام — شريط جانبي أنيق + خط سفلي */
+  .b-section{
+    color:var(--accent); font-weight:800; font-size:1.05em; margin:.7em 0 .35em; outline:none;
+    border-inline-start:4px solid var(--accent); padding-inline-start:.5em;
+    border-bottom:1.5px solid #f0d9d8; padding-bottom:.15em;
+  }
+  .b-subhead{
+    color:var(--accent-2); font-weight:700; font-size:.95em; margin:.2em 0 .55em; outline:none;
+    padding-inline-start:1em; position:relative;
+  }
+  .b-subhead::before{
+    content:""; position:absolute; inset-inline-start:0; top:.45em;
+    width:.55em; height:2px; background:var(--accent-2); border-radius:2px;
+  }
+  .b-paragraph{ margin:.4em 0; outline:none; text-align:justify; }
+  .b-source{ font-weight:700; font-size:.9em; margin:.3em 0 .7em; outline:none; color:#374151; }
 
-  .b-question{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; margin:4px 0;}
-  .b-question .qtext{flex:1; outline:none;}
-  .b-question .qpts{font-weight:700; white-space:nowrap; outline:none; direction:ltr;}
+  /* الأسئلة — رقم بارز ونقاط بشارة أنيقة */
+  .b-question{
+    display:flex; justify-content:space-between; gap:.8em; align-items:baseline;
+    margin:.35em 0; padding-bottom:.15em; border-bottom:1px dotted #e5e7eb;
+  }
+  .b-question .qtext{flex:1; outline:none; line-height:1.7;}
+  .b-question .qtext::first-letter{color:var(--accent-2); font-weight:800;}
+  .b-question .qpts{
+    font-weight:800; white-space:nowrap; outline:none; direction:ltr;
+    background:#fdeceb; color:var(--accent); border-radius:6px;
+    padding:.05em .55em; font-size:.82em;
+  }
 
-  .b-options{ display:flex; gap:18px; flex-wrap:wrap; padding-inline-start:26px; margin:2px 0 9px;}
-  .b-options span{font-weight:700; outline:none;}
-  .b-options span.o0{color:#000;}
+  /* الخيارات — شبكة متناسقة بألوان مميزة */
+  .b-options{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5em,1fr));
+    gap:.15em 1em; padding-inline-start:1.8em; margin:.15em 0 .65em;
+  }
+  .b-options span{font-weight:700; outline:none; padding:.05em .3em; border-radius:4px;}
+  .b-options span.o0{color:#111827;}
   .b-options span.o1{color:#1f5c99;}
   .b-options span.o2{color:#1a7a3c;}
   .b-options span.o3{color:#8b2c6e;}
 
-  table.b-table{width:100%; border-collapse:collapse; margin:8px 0;}
-  table.b-table td{border:1px solid #000; padding:5px 8px; font-size:.85rem; vertical-align:top; outline:none;}
-  table.b-table td.letter{width:24px; font-weight:700; color:#1f5c99;}
+  table.b-table{width:100%; border-collapse:collapse; margin:.5em 0;}
+  table.b-table td{border:1px solid #000; padding:.35em .6em; font-size:.9em; vertical-align:top; outline:none;}
+  table.b-table td.letter{width:1.8em; font-weight:800; color:#1f5c99; text-align:center; background:#eef5fc;}
 
-  .b-closing{ text-align:center; border-top:1px dashed #000; padding-top:8px; margin-top:14px; color:var(--accent); font-weight:700; outline:none;}
-  .b-blank{ margin:8px 0; outline:none;}
+  .b-closing{
+    text-align:center; border-top:1.5px dashed #000; padding-top:.5em; margin-top:1em;
+    color:var(--accent); font-weight:800; outline:none; letter-spacing:.5px;
+  }
+  .b-blank{ margin:.55em 0; outline:none; letter-spacing:1px; }
 
   .page-break-marker{
     text-align:center; color:#9aa4b2; font-size:.75rem; margin:14px 0;
@@ -161,25 +194,31 @@
 
   .export-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
 
+  .fit-note{
+    text-align:center; font-size:.72rem; color:#7c8aa0; margin:-14px auto 18px;
+  }
+
   @media (max-width:720px){
-    .page{width:100%; min-height:auto; padding:14px; font-size:11.5px;}
+    .page{width:100%; padding:14px; font-size:calc(11.5px * var(--fs));}
     .sheet-outer{padding:10px 4px;}
   }
 
   @media print{
+    @page{ size:A4; margin:0; }
     header.app, .steps, .toolbar, .export-row, .no-print, #panelCapture, #panelExport,
-    .panel h2, .panel .hint{display:none !important;}
+    .panel h2, .panel .hint, .fit-note{display:none !important;}
     .panel:not(.print-target){display:none !important;}
     body{background:#fff;}
     .wrap{margin:0; padding:0; max-width:none;}
     .panel.print-target{box-shadow:none; padding:0; border-radius:0; margin:0;}
-    .sheet-outer{background:#fff; padding:0;}
+    .sheet-outer{background:#fff; padding:0; overflow:visible;}
     .page{
-      box-shadow:none; margin:0; width:auto; min-height:100vh;
-      page-break-after:always; border-width:4px;
+      box-shadow:none; margin:0; width:210mm; height:297mm;
+      page-break-after:always; border-width:5pt;
     }
     .block .controls{display:none !important;}
     .block:hover{outline:none;}
+    .page-break-marker{display:none;}
   }
 </style>
 </head>
@@ -187,7 +226,7 @@
 
 <header class="app">
   <h1>مُجهّز صفحة الأسئلة</h1>
-  <p>صوّر ورقة الامتحان، ودعه يجهّز لك نسخة منسّقة جاهزة للتحميل</p>
+  <p>صوّر ورقة الامتحان، ودعه يجهّز لك نسخة منسّقة جاهزة للتحميل — كل صورة في صفحة A4 واحدة</p>
 </header>
 
 <div class="wrap">
@@ -202,7 +241,7 @@
   <!-- STEP 1: capture -->
   <section class="panel" id="panelCapture">
     <h2>١. صوّر ورقة الأسئلة</h2>
-    <p class="hint">التقط صورة واضحة ومستقيمة لصفحة الأسئلة (إضاءة جيدة، بدون ظل يغطي النص). يمكنك إضافة أكثر من صورة إذا كان الامتحان من عدة صفحات — كل صورة تُضاف كصفحة جديدة في الملف النهائي.</p>
+    <p class="hint">التقط صورة واضحة ومستقيمة لصفحة الأسئلة (إضاءة جيدة، بدون ظل يغطي النص). يمكنك إضافة أكثر من صورة إذا كان الامتحان من عدة صفحات — كل صورة تُضاف كصفحة A4 مستقلة في الملف النهائي.</p>
     <div class="capture-row">
       <button class="btn btn-primary" id="btnCamera">📷 التقاط بالكاميرا</button>
       <button class="btn btn-secondary" id="btnGallery">🖼️ اختيار من المعرض</button>
@@ -226,7 +265,7 @@
   <!-- STEP 3: structured preview -->
   <section class="panel print-target" id="panelPreview" style="display:none;">
     <h2>٣. راجع وعدّل الصفحة</h2>
-    <p class="hint">اضغط على أي نص لتعديله مباشرة. استخدم الأزرار الصغيرة فوق كل عنصر (عند تمرير الفأرة/اللمس) للحذف أو تحريك العنصر. استخدم الأزرار أدناه لإضافة عناصر جديدة في أي مكان — التحليل الآلي قد يخطئ أحياناً في كلمة أو ترتيب، فراجع النتيجة قبل التحميل.</p>
+    <p class="hint">اضغط على أي نص لتعديله مباشرة — يُضبط حجم الخط تلقائياً ليبقى المحتوى كاملاً ضمن صفحة A4 واحدة. استخدم الأزرار الصغيرة فوق كل عنصر للحذف أو التحريك، والأزرار أدناه لإضافة عناصر جديدة.</p>
 
     <div class="toolbar" id="toolbar">
       <span class="lbl">إضافة عنصر جديد إلى نهاية الصفحة الحالية:</span>
@@ -245,6 +284,7 @@
     <div class="sheet-outer">
       <div id="sheet"></div>
     </div>
+    <div class="fit-note no-print">كل صفحة أعلاه = صفحة A4 واحدة تماماً في الملف النهائي</div>
 
     <div class="export-row">
       <button class="btn btn-secondary" id="btnAddMorePhoto">📷 إضافة صورة لصفحة أخرى</button>
@@ -254,7 +294,7 @@
   <!-- STEP 4: export -->
   <section class="panel" id="panelExport" style="display:none;">
     <h2>٤. تحميل الملف النهائي</h2>
-    <p class="hint">نزّل الصفحة كملف Word جاهز للتعديل في Word، أو اطبعها مباشرة كـ PDF من نافذة الطباعة.</p>
+    <p class="hint">نزّل الصفحة كملف Word متوافق تماماً مع تطبيق Word على هواتف أندرويد وجاهز للتعديل، أو اطبعها مباشرة كـ PDF.</p>
     <div class="export-row">
       <button class="btn btn-primary" id="btnExportWord">⬇️ تحميل Word (.doc)</button>
       <button class="btn btn-secondary" id="btnPrint">🖨️ طباعة / حفظ PDF</button>
@@ -271,6 +311,8 @@
   let currentFile = null;
   /** pages: array of pages, each page is array of blocks */
   let pages = [[]];
+  /** pageScales: نسبة تصغير كل صفحة حتى تبقى ضمن A4 واحدة */
+  let pageScales = [1];
 
   const $ = sel => document.querySelector(sel);
 
@@ -316,10 +358,7 @@
     });
   }
 
-  // ملاحظة: صار التحليل يتم عبر سيرفر بروكسي خاص بك (/api/analyze)
-  // بدل استدعاء api.anthropic.com مباشرة من المتصفح — هيك ما في مفتاح API
-  // أو تعليمات التحليل ظاهرة بكود الصفحة.
-
+  // ملاحظة: التحليل يتم عبر سيرفر بروكسي خاص بك (/api/analyze)
   // إذا فعّلت الحماية البسيطة (APP_SECRET) على السيرفر، حط نفس القيمة هون:
   const APP_SECRET = ''; // مثال: 'my-secret-123' — خلّيه فاضي إذا ما فعّلت الحماية
 
@@ -378,7 +417,6 @@
         (err && err.message ? '(' + err.message + ') ' : '') +
         'تأكد أن الصورة واضحة وأن الاتصال بالإنترنت متوفر، ثم أعد المحاولة. ' +
         'يمكنك أيضاً بناء الصفحة يدوياً باستخدام أزرار الإضافة في خطوة المراجعة.';
-      // still let the user proceed manually
       activateStep(3);
       $('#panelPreview').style.display = 'block';
       $('#panelExport').style.display = 'block';
@@ -396,14 +434,12 @@
     const start = s.indexOf('[');
     if(start > 0) s = s.slice(start);
     try{ return JSON.parse(s); }catch(e){}
-    // try trimming to the last complete object
     const lastComma = s.lastIndexOf('},');
     if(lastComma > -1){
       let repaired = s.slice(0, lastComma+1) + ']';
       if(!repaired.trim().startsWith('[')) repaired = '[' + repaired;
       try{ return JSON.parse(repaired); }catch(e){}
     }
-    // last resort: parse each {...} object individually
     const matches = s.match(/\{[^{}]*(?:\[[^\[\]]*\][^{}]*)*\}/g) || [];
     const out = [];
     matches.forEach(m => { try{ out.push(JSON.parse(m)); }catch(e){} });
@@ -432,6 +468,31 @@
   function dirFor(text){ return isArabic(text) ? 'rtl' : 'ltr'; }
   function alignFor(text){ return isArabic(text) ? 'right' : 'left'; }
 
+  // ---------- auto-fit: كل صورة ضمن صفحة A4 واحدة تماماً ----------
+  let fitTimer = null;
+  function scheduleFit(){
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(fitAllPages, 350);
+  }
+  function fitAllPages(){
+    const els = document.querySelectorAll('#sheet .page');
+    els.forEach((el, i) => {
+      let s = 1;
+      el.style.setProperty('--fs', '1');
+      pageScales[i] = 1;
+      let guard = 80;
+      while(el.scrollHeight > el.clientHeight + 1 && s > 0.5 && guard-- > 0){
+        s = Math.max(0.5, s - 0.02);
+        el.style.setProperty('--fs', s.toFixed(2));
+        pageScales[i] = s;
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    $('#sheet').addEventListener('input', scheduleFit);
+  });
+  window.addEventListener('resize', scheduleFit);
+
   // ---------- render editable sheet ----------
   function renderSheet(){
     const sheet = $('#sheet');
@@ -459,6 +520,7 @@
         sheet.appendChild(marker);
       }
     });
+    requestAnimationFrame(fitAllPages);
   }
 
   function controls(pIdx, bIdx){
@@ -662,39 +724,139 @@
     window.scrollTo({top:0, behavior:'smooth'});
   });
 
-  // ---------- export: Word ----------
+  // ============================================================
+  //  تصدير Word متوافق 100% مع تطبيق Word على أندرويد
+  //  — يُبنى من نموذج البيانات مباشرة بجداول HTML وأنماط مدمجة
+  //    (Word للهواتف لا يدعم flexbox ولا الوحدات الحديثة)
+  // ============================================================
   $('#btnExportWord').addEventListener('click', exportWord);
 
+  function esc(t){
+    return String(t == null ? '' : t)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function pt(x){ return (Math.round(x * 2) / 2).toFixed(1); }
+
+  function blockToWord(b, s){
+    const F = "'Traditional Arabic','Sakkal Majalla',Arial,Tahoma,sans-serif";
+    switch(b.type){
+      case 'heading':
+        return '<table width="100%" cellpadding="6" cellspacing="0" style="border:2.5pt double #A3231F; margin:0 0 ' + pt(8*s) + 'pt;">'
+          + '<tr><td align="center" style="font-family:' + F + ';">'
+          + '<b><span dir="auto" style="font-size:' + pt(15*s) + 'pt;">' + esc(b.text) + '</span></b>'
+          + ' <span style="background:#FFE066; font-size:' + pt(10*s) + 'pt; font-weight:bold;">&nbsp;1&nbsp;</span>'
+          + '</td></tr></table>';
+      case 'section': {
+        const d = dirFor(b.text), a = alignFor(b.text);
+        return '<p dir="' + d + '" style="direction:' + d + '; text-align:' + a + '; font-family:' + F + '; font-size:' + pt(13.5*s) + 'pt; font-weight:bold; color:#A3231F; border-bottom:1pt solid #A3231F; padding-bottom:2pt; margin:' + pt(9*s) + 'pt 0 ' + pt(4*s) + 'pt 0;">' + esc(b.text) + '</p>';
+      }
+      case 'subhead': {
+        const d = dirFor(b.text), a = alignFor(b.text);
+        return '<p dir="' + d + '" style="direction:' + d + '; text-align:' + a + '; font-family:' + F + '; font-size:' + pt(12*s) + 'pt; font-weight:bold; color:#1F5C99; margin:' + pt(3*s) + 'pt 0 ' + pt(6*s) + 'pt 0;">' + esc(b.text) + '</p>';
+      }
+      case 'paragraph': {
+        const rtl = isArabic(b.text);
+        const d = rtl ? 'rtl' : 'ltr', a = rtl ? 'right' : 'justify';
+        return '<p dir="' + d + '" style="direction:' + d + '; text-align:' + a + '; font-family:' + F + '; font-size:' + pt(12.5*s) + 'pt; margin:' + pt(4*s) + 'pt 0; line-height:150%;">' + esc(b.text) + '</p>';
+      }
+      case 'source': {
+        const d = dirFor(b.text), a = alignFor(b.text);
+        return '<p dir="' + d + '" style="direction:' + d + '; text-align:' + a + '; font-family:' + F + '; font-size:' + pt(11*s) + 'pt; font-weight:bold; color:#374151; margin:' + pt(3*s) + 'pt 0 ' + pt(8*s) + 'pt 0;">' + esc(b.text) + '</p>';
+      }
+      case 'question': {
+        const d = dirFor(b.text);
+        const qa = d === 'rtl' ? 'right' : 'left';
+        const pa = d === 'rtl' ? 'left' : 'right';
+        const num = b.num ? '<b><span style="color:#1F5C99;">' + esc(b.num) + '.</span></b>&nbsp;' : '';
+        return '<table width="100%" dir="' + d + '" cellpadding="0" cellspacing="0" style="margin:' + pt(4*s) + 'pt 0; direction:' + d + ';">'
+          + '<tr>'
+          + '<td dir="' + d + '" align="' + qa + '" style="font-family:' + F + '; font-size:' + pt(12.5*s) + 'pt; line-height:150%;">' + num + esc(b.text) + '</td>'
+          + '<td dir="ltr" width="75" align="' + pa + '" valign="top" style="font-family:' + F + '; font-size:' + pt(11*s) + 'pt; font-weight:bold; color:#A3231F; white-space:nowrap;">' + esc(b.points || '') + '</td>'
+          + '</tr></table>';
+      }
+      case 'options': {
+        const opts = (b.opts && b.opts.length) ? b.opts.slice(0,4) : [];
+        const anyText = opts.join(' ');
+        const d = dirFor(anyText);
+        const colors = ['#111827', '#1F5C99', '#1A7A3C', '#8B2C6E'];
+        let cells = '';
+        opts.forEach((opt, idx) => {
+          const m = String(opt).match(/^([a-zA-Zأ-ي])\.\s*(.*)$/);
+          const letter = m ? m[1] : '';
+          const rest = m ? m[2] : String(opt);
+          cells += '<td width="25%" dir="' + d + '" style="font-family:' + F + '; font-size:' + pt(11.5*s) + 'pt; padding:' + pt(2*s) + 'pt ' + pt(6*s) + 'pt; color:' + colors[idx % 4] + ';">'
+            + (letter ? '<b>' + esc(letter) + '.</b> ' : '') + esc(rest) + '</td>';
+        });
+        return '<table width="100%" dir="' + d + '" cellpadding="0" cellspacing="0" style="margin:' + pt(2*s) + 'pt 0 ' + pt(8*s) + 'pt 0; direction:' + d + ';"><tr>' + cells + '</tr></table>';
+      }
+      case 'table': {
+        const rows = (b.rows && b.rows.length) ? b.rows : [];
+        const anyText = rows.map(r => r[1]).join(' ');
+        const d = dirFor(anyText), a = alignFor(anyText);
+        let trs = '';
+        rows.forEach(row => {
+          trs += '<tr>'
+            + '<td width="30" align="center" style="border:0.75pt solid #000; font-family:' + F + '; font-size:' + pt(11.5*s) + 'pt; font-weight:bold; color:#1F5C99; padding:' + pt(3*s) + 'pt;">' + esc(row[0]) + '</td>'
+            + '<td dir="' + dirFor(row[1]) + '" align="' + a + '" style="border:0.75pt solid #000; font-family:' + F + '; font-size:' + pt(11.5*s) + 'pt; padding:' + pt(3*s) + 'pt ' + pt(8*s) + 'pt;">' + esc(row[1]) + '</td>'
+            + '</tr>';
+        });
+        return '<table width="100%" dir="' + d + '" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin:' + pt(6*s) + 'pt 0; direction:' + d + ';">' + trs + '</table>';
+      }
+      case 'blank':
+        return '<p dir="ltr" style="direction:ltr; text-align:left; font-family:' + F + '; font-size:' + pt(12*s) + 'pt; margin:' + pt(6*s) + 'pt 0;">' + esc(b.text) + '</p>';
+      case 'closing':
+        return '<p dir="' + dirFor(b.text) + '" align="center" style="text-align:center; font-family:' + F + '; font-size:' + pt(12.5*s) + 'pt; font-weight:bold; color:#A3231F; border-top:0.75pt dashed #000; padding-top:' + pt(5*s) + 'pt; margin-top:' + pt(12*s) + 'pt;">' + esc(b.text) + '</p>';
+      default:
+        return '';
+    }
+  }
+
   function exportWord(){
-    const sheetHtml = $('#sheet').innerHTML.replace(/<div class="controls no-print">[\s\S]*?<\/div>/g, '');
-    const styleForWord = `
-      body{font-family:Arial, Tahoma, sans-serif;}
-      .page{width:210mm;min-height:297mm;border:7px double #1f5c99;padding:9mm 10mm;margin:0 0 20px;font-size:12.5px;line-height:1.55;}
-      .title-box{border:3px double #a3231f;text-align:center;padding:6px 10px;font-weight:700;font-size:1.05rem;margin-bottom:10px;}
-      .title-box .badge{display:inline-block;width:20px;height:20px;border-radius:50%;background:#ffe066;font-size:.8rem;font-weight:800;margin-inline-start:6px;text-align:center;}
-      .b-section{color:#a3231f;font-weight:800;font-size:.92rem;margin:10px 0 5px;}
-      .b-subhead{color:#1f5c99;font-weight:700;font-size:.88rem;margin:2px 0 8px;}
-      .b-paragraph{margin:5px 0;}
-      .b-source{font-weight:700;font-size:.85rem;margin:4px 0 10px;}
-      .b-question{display:flex;justify-content:space-between;gap:10px;margin:4px 0;}
-      .b-options{display:flex;gap:18px;flex-wrap:wrap;padding-inline-start:26px;margin:2px 0 9px;}
-      .b-options .o0{color:#000;font-weight:700;} .b-options .o1{color:#1f5c99;font-weight:700;}
-      .b-options .o2{color:#1a7a3c;font-weight:700;} .b-options .o3{color:#8b2c6e;font-weight:700;}
-      table.b-table{width:100%;border-collapse:collapse;margin:8px 0;}
-      table.b-table td{border:1px solid #000;padding:5px 8px;font-size:.85rem;}
-      .b-closing{text-align:center;border-top:1px dashed #000;padding-top:8px;margin-top:14px;color:#a3231f;font-weight:700;}
-      .qpts{font-weight:700;white-space:nowrap;}
-    `;
-    const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-    <head><meta charset="utf-8"><title>ورقة الأسئلة</title>
-    <style>${styleForWord}</style></head>
-    <body dir="rtl">${sheetHtml}</body></html>`;
+    let body = '';
+    pages.forEach((blocks, pIdx) => {
+      if(!blocks || blocks.length === 0) return;
+      const s = pageScales[pIdx] || 1;
+      let inner = '';
+      blocks.forEach(b => { inner += blockToWord(b, s); });
+      body += '<table width="100%" cellpadding="14" cellspacing="0" style="border:4.5pt double #1F5C99; margin:0;">'
+        + '<tr><td>' + inner + '</td></tr></table>';
+      if(pIdx < pages.length - 1){
+        body += '<br clear="all" style="mso-special-character:line-break; page-break-before:always;">';
+      }
+    });
+    if(!body) return;
+
+    const html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+      + '<head><meta charset="utf-8"><meta name="ProgId" content="Word.Document"><title>ورقة الأسئلة</title>'
+      + '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->'
+      + '<style>'
+      + '@page Section1 { size:21cm 29.7cm; margin:1.1cm 1.2cm 1.1cm 1.2cm; mso-header-margin:0cm; mso-footer-margin:0cm; mso-paper-source:0; mso-page-orientation:portrait; }'
+      + 'div.Section1 { page:Section1; }'
+      + 'body { font-family:\'Traditional Arabic\',Arial,Tahoma,sans-serif; }'
+      + 'p { margin:0; }'
+      + 'table { border-collapse:collapse; }'
+      + '</style></head>'
+      + '<body dir="rtl"><div class="Section1">' + body + '</div></body></html>';
 
     const blob = new Blob(['\ufeff', html], {type:'application/msword'});
+    const fileName = 'ورقة-الأسئلة.doc';
+
+    // داخل تطبيق أندرويد: حفظ مباشر إلى مجلد التنزيلات
+    if(window.AndroidDownloader){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          window.AndroidDownloader.saveFile(reader.result.split(',')[1], fileName, 'application/msword');
+        }catch(e){}
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ورقة-الأسئلة.doc';
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
