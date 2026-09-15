@@ -1,6 +1,8 @@
-// Cloudflare Pages Function — مجاني بالكامل، ما في سيرفر تحتاج تدفع تشغيله
-// هاد الملف بيتحوّل تلقائياً لمسار /api/analyze حسب مكانه (functions/api/analyze.js)
+// Netlify Function — مجاني بالكامل، بديل عن Cloudflare Pages Function
 // بيستخدم Gemini API المجاني من Google بدل Anthropic المدفوع
+// الرابط النهائي بعد النشر: /.netlify/functions/analyze
+// وملف netlify.toml بيحوّل /api/analyze لهذا المسار تلقائياً، حتى index.html
+// يشتغل من غير أي تعديل إضافي.
 
 const PROMPT = [
   "You are reading a photographed page of a school exam. The page mixes Arabic instructions/headers with French exam content (or is fully Arabic).",
@@ -21,21 +23,25 @@ const PROMPT = [
 
 const MODEL = "gemini-2.5-flash"; // مجاني على Google AI Studio ويدعم الصور
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
-
+exports.handler = async function (event) {
   try {
-    if (env.APP_SECRET && request.headers.get("X-App-Secret") !== env.APP_SECRET) {
+    if (event.httpMethod !== "POST") {
+      return json({ error: "Method not allowed" }, 405);
+    }
+
+    const APP_SECRET = process.env.APP_SECRET || "";
+    if (APP_SECRET && event.headers["x-app-secret"] !== APP_SECRET) {
       return json({ error: "غير مصرّح." }, 401);
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = JSON.parse(event.body || "{}");
     const { image, mediaType } = body;
     if (!image) {
       return json({ error: "لم يتم إرسال صورة." }, 400);
     }
-    if (!env.GEMINI_API_KEY) {
-      return json({ error: "مفتاح Gemini API غير مضبوط على Cloudflare (GEMINI_API_KEY)." }, 500);
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) {
+      return json({ error: "مفتاح Gemini API غير مضبوط على Netlify (GEMINI_API_KEY)." }, 500);
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
@@ -44,7 +50,7 @@ export async function onRequestPost(context) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-goog-api-key": env.GEMINI_API_KEY
+        "x-goog-api-key": GEMINI_API_KEY
       },
       body: JSON.stringify({
         contents: [
@@ -69,17 +75,18 @@ export async function onRequestPost(context) {
     const text = parts.map(p => p.text).filter(Boolean).join("\n");
 
     // نرجّعها بنفس شكل رد Anthropic (content: [{type:'text', text}])
-    // حتى كود الواجهة (public/index.html) يشتغل من غير أي تعديل إضافي
+    // حتى كود الواجهة (index.html) يشتغل من غير أي تعديل إضافي
     return json({ content: [{ type: "text", text }] }, 200);
 
   } catch (err) {
     return json({ error: err.message || "خطأ غير متوقع." }, 500);
   }
-}
+};
 
 function json(obj, status) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { "content-type": "application/json" }
-  });
+  return {
+    statusCode: status,
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(obj)
+  };
 }
